@@ -119,6 +119,9 @@ public class MainActivity extends Activity {
 
                 // Player has removed finger from screen
                 case MotionEvent.ACTION_UP:
+                    // Here I'm taking the location of the event to send to pawn
+                    float x = motionEvent.getX();
+                    float y = motionEvent.getY();
 
                     // Set isMoving so the Lamia does not move
                     isMoving = false;
@@ -138,6 +141,7 @@ public class MainActivity extends Activity {
                 Lamia.animate(time);
             }
             // Eventually i'd like her to move towards where the last touch was
+
         }
 
         public void draw() {

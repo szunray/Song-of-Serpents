@@ -20,6 +20,12 @@ public class Pawn {
     private long frameTimer;
     private long fps;
 
+    //Moving some attributes to the pawn itself
+    float pawnMoveSpeed=150;
+    float pawnXPosition=10;
+    float pawnYPosition=200;
+
+
     //current frame is the index of the image in our animation array to use
      int currentFrame ;
     private int frameCount = animation.length;
@@ -32,6 +38,23 @@ public class Pawn {
                 currentFrame = 0;
         }
 
+    }
+// The start of the move function
+    public void move(float Xposition, float Yposition){
+        if (Xposition>pawnXPosition){
+           pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
+        }
+        else if (Xposition<pawnXPosition){
+            pawnXPosition = pawnXPosition - (pawnMoveSpeed / fps);
+        }
+
+    }
+
+    public float getX(){
+        return pawnXPosition;
+    }
+    public float getY(){
+        return pawnYPosition;
     }
 
     //pawn constructor.

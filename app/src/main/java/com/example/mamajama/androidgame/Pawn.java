@@ -1,19 +1,23 @@
 package com.example.mamajama.androidgame;
 import android.graphics.Bitmap;
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
+
 /**
  * Created by MamaJama on 12/1/2017.
  */
 
 public class Pawn {
     // an array of images comprising the frames of an animation
-    private Bitmap[] animation;
+     Bitmap[] animation = new Bitmap[5];
 
     //Use frametimer and fps to determine if an animation should update.
     private long frameTimer;
     private long fps;
 
     //current frame is the index of the image in our animation array to use
-    private int currentFrame;
+     int currentFrame ;
     private int frameCount = animation.length;
 
     public void animate(long gameTime){
@@ -25,8 +29,21 @@ public class Pawn {
 
     }
 
-    public Pawn(String animationPrefix, int frames, long fps, long timer){
-        animation = new Bitmap [frames];
+    public Pawn(Context context, String animationPrefix){
+
+        for(int x=0; x<5; x++){
+            Resources resources = context.getResources();
+            String nameOfImage = animationPrefix+"_"+(x+1);
+            int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
+            animation[x] = BitmapFactory.decodeResource(resources,resId);
+            //animation[x] = BitmapFactory.decodeResource(context.getResources(), R.drawable.lamia_02);
+
+
+        }
+
+        currentFrame=0;
+        frameTimer=10;
+        fps=9;
 
     }
 

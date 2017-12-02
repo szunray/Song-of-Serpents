@@ -51,6 +51,10 @@ public class MainActivity extends Activity {
         //Our bitmap
         Bitmap bitmapLamia;
 
+        //TESTING Pawn
+        //Trying to instance a new pawn:
+        Pawn Lamia;
+
         //Lamia is not moving at the start
         boolean isMoving = false;
 
@@ -71,7 +75,11 @@ public class MainActivity extends Activity {
 
             //load Lamia from the .PNG file
             bitmapLamia = BitmapFactory.decodeResource(this.getResources(), R.drawable.lamia_02);
-        }
+
+            //instantiating Pawn
+           Lamia = new Pawn(context, "lamiawalk");
+
+    }
 
 
         @Override
@@ -155,6 +163,8 @@ public class MainActivity extends Activity {
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
 
                 //draw the lamia at the proper position
+                //canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], lamiaXPosition, 200, paint);
+
                 canvas.drawBitmap(bitmapLamia, lamiaXPosition, 200, paint);
 
                 // Draw everything to the screen

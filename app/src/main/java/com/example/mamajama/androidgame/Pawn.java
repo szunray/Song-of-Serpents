@@ -25,6 +25,10 @@ public class Pawn {
     float pawnXPosition=10;
     float pawnYPosition=200;
 
+    float destination[] = {10,200};
+
+    boolean isMoving=false;
+
 
     //current frame is the index of the image in our animation array to use
      int currentFrame ;
@@ -40,13 +44,30 @@ public class Pawn {
 
     }
 // The start of the move function
-    public void move(float Xposition, float Yposition){
-        if (Xposition>pawnXPosition){
+
+    public void setDestination(float Xposition, float Yposition){
+        destination[0]=Xposition;
+        destination[1]=Yposition;
+    }
+    public void move(){
+        isMoving=false;
+        if (destination[0]-pawnMoveSpeed>pawnXPosition){
+            isMoving=true;
            pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
         }
-        else if (Xposition<pawnXPosition){
+        else if (destination[0]+pawnMoveSpeed<pawnXPosition){
+            isMoving=true;
             pawnXPosition = pawnXPosition - (pawnMoveSpeed / fps);
         }
+        if (destination[1]-pawnMoveSpeed>pawnYPosition){
+            isMoving=true;
+            pawnYPosition=pawnYPosition+(pawnMoveSpeed/fps);
+        }
+        else if(destination[1]+pawnMoveSpeed<pawnYPosition){
+            isMoving=true;
+            pawnYPosition=pawnYPosition-(pawnMoveSpeed/fps);
+        }
+
 
     }
 

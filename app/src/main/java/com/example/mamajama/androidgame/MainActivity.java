@@ -122,6 +122,7 @@ public class MainActivity extends Activity {
                     // Here I'm taking the location of the event to send to pawn
                     float x = motionEvent.getX();
                     float y = motionEvent.getY();
+                    Lamia.setDestination(x,y);
 
                     // Set isMoving so the Lamia does not move
                     isMoving = false;
@@ -136,8 +137,9 @@ public class MainActivity extends Activity {
         public void update(long time) {
 
             //If Lamia is moving, then move her to the right
-            if (isMoving) {
-                lamiaXPosition = lamiaXPosition + (walkSpeedPerSecond / fps);
+            Lamia.move();
+            if (Lamia.isMoving) {
+                //lamiaXPosition = lamiaXPosition + (walkSpeedPerSecond / fps);
                 Lamia.animate(time);
             }
             // Eventually i'd like her to move towards where the last touch was
@@ -165,7 +167,7 @@ public class MainActivity extends Activity {
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
 
                 //draw the lamia at the proper position
-                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], lamiaXPosition, 200, paint);
+                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
 
 
 

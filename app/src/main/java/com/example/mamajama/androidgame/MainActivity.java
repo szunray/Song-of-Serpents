@@ -73,9 +73,6 @@ public class MainActivity extends Activity {
             ourHolder = getHolder();
             paint = new Paint();
 
-            //load Lamia from the .PNG file
-            bitmapLamia = BitmapFactory.decodeResource(this.getResources(), R.drawable.lamia_02);
-
             //instantiating Pawn
            Lamia = new Pawn(context, "lamiawalk");
 
@@ -90,7 +87,7 @@ public class MainActivity extends Activity {
                 long startFrameTime = System.currentTimeMillis();
 
                 //Then update
-                update();
+                update(startFrameTime);
 
                 //Then draw
                 draw();
@@ -133,13 +130,14 @@ public class MainActivity extends Activity {
         }
 
 
-        public void update() {
+        public void update(long time) {
 
             //If Lamia is moving, then move her to the right
             if (isMoving) {
                 lamiaXPosition = lamiaXPosition + (walkSpeedPerSecond / fps);
+                Lamia.animate(time);
             }
-
+            // Eventually i'd like her to move towards where the last touch was
         }
 
         public void draw() {
@@ -163,9 +161,9 @@ public class MainActivity extends Activity {
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
 
                 //draw the lamia at the proper position
-                //canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], lamiaXPosition, 200, paint);
+                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], lamiaXPosition, 200, paint);
 
-                canvas.drawBitmap(bitmapLamia, lamiaXPosition, 200, paint);
+
 
                 // Draw everything to the screen
                 // and unlock the drawing surface

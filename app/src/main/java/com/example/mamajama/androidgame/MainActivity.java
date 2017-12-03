@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
                 //lamiaXPosition = lamiaXPosition + (walkSpeedPerSecond / fps);
                 Lamia.animate(time);
             }
-            // Eventually i'd like her to move towards where the last touch was
+
 
         }
 
@@ -185,7 +185,8 @@ public class MainActivity extends Activity {
                 for(int x=0; x<map.length; x++){
                     float xpos= (x%w)*TILE_WIDTH;
                     float ypos= (x/w)*TILE_HEIGHT;
-                    canvas.drawText("X",xpos,ypos,paint);
+                    Bitmap tile = BitmapFactory.decodeResource(this.getResources(),R.drawable.grasscenterblock);
+                    canvas.drawBitmap(tile,xpos,ypos,paint);
                 }
 
                 // Display the current fps on the screen

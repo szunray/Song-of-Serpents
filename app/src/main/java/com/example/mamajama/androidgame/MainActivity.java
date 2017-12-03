@@ -15,7 +15,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.os.Bundle;
 
+
 public class MainActivity extends Activity {
+
+    //Setting some constants we'll need for the map
+    public static int TILE_WIDTH = 200;
+    public static int TILE_HEIGHT = 200;
+    public static int SCREEN_WIDTH = 1200;
+    public static int SCREEN_HEIGHT = 1600;
+
     GameView gameView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +32,7 @@ public class MainActivity extends Activity {
         // Initialize gameView and set it as the view
         gameView = new GameView(this);
         setContentView(gameView);
+
 
     }
 
@@ -58,13 +67,21 @@ public class MainActivity extends Activity {
         //Lamia is not moving at the start
         boolean isMoving = false;
 
-        //She walks at 150 pixels per second
-        float walkSpeedPerSecond = 150;
+        //Creating game grid
 
-        //She begins 10 Pixels from the left
-        float lamiaXPosition = 10;
+
+        int w = (SCREEN_WIDTH/TILE_WIDTH);
+        int h = (SCREEN_HEIGHT/TILE_HEIGHT);
+
+        int map[] = new int[(w*h)];
+
+
+
+
+
 
         public GameView(Context context) {
+
 
             //Have SurfaceView set up our object
             super(context);
@@ -75,6 +92,7 @@ public class MainActivity extends Activity {
 
             //instantiating Pawn
            Lamia = new Pawn(context, "lamiawalk");
+
 
     }
 
@@ -120,8 +138,8 @@ public class MainActivity extends Activity {
                 // Player has removed finger from screen
                 case MotionEvent.ACTION_UP:
                     // Here I'm taking the location of the event to send to pawn
-                    float x = motionEvent.getX();
-                    float y = motionEvent.getY();
+                    float x = Math.round(motionEvent.getX()/TILE_WIDTH)*TILE_WIDTH;
+                    float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;
                     Lamia.setDestination(x,y);
 
                     // Set isMoving so the Lamia does not move
@@ -163,8 +181,18 @@ public class MainActivity extends Activity {
                 // Make the text a bit bigger
                 paint.setTextSize(45);
 
+
+                for(int x=0; x<map.length; x++){
+                    float xpos= (x%w)*TILE_WIDTH;
+                    float ypos= (x/w)*TILE_HEIGHT;
+                    canvas.drawText("X",xpos,ypos,paint);
+                }
+
                 // Display the current fps on the screen
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
+
+
+
 
                 //draw the lamia at the proper position
                 canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);

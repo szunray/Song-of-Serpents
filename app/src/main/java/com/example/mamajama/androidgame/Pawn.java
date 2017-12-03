@@ -21,11 +21,11 @@ public class Pawn {
     private long fps;
 
     //Moving some attributes to the pawn itself
-    float pawnMoveSpeed=150;
-    float pawnXPosition=10;
+    float pawnMoveSpeed=100;
+    float pawnXPosition=0;
     float pawnYPosition=200;
 
-    float destination[] = {10,200};
+    float destination[] = {0,200};
 
     boolean isMoving=false;
 
@@ -51,19 +51,19 @@ public class Pawn {
     }
     public void move(){
         isMoving=false;
-        if (destination[0]-pawnMoveSpeed>pawnXPosition){
+        if (destination[0]>pawnXPosition){
             isMoving=true;
            pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
         }
-        else if (destination[0]+pawnMoveSpeed<pawnXPosition){
+        else if (destination[0]<pawnXPosition){
             isMoving=true;
             pawnXPosition = pawnXPosition - (pawnMoveSpeed / fps);
         }
-        if (destination[1]-pawnMoveSpeed>pawnYPosition){
+        if (destination[1]>pawnYPosition){
             isMoving=true;
             pawnYPosition=pawnYPosition+(pawnMoveSpeed/fps);
         }
-        else if(destination[1]+pawnMoveSpeed<pawnYPosition){
+        else if(destination[1]<pawnYPosition){
             isMoving=true;
             pawnYPosition=pawnYPosition-(pawnMoveSpeed/fps);
         }
@@ -94,7 +94,7 @@ public class Pawn {
 
         currentFrame=0;
         frameTimer=10;
-        fps=9;
+        fps=10;
 
     }
 

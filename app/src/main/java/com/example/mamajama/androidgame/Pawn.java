@@ -21,7 +21,7 @@ public class Pawn {
     private long fps;
 
     //Moving some attributes to the pawn itself
-    float pawnMoveSpeed=200;
+    float pawnMoveSpeed=400;
     float pawnXPosition=0;
     float pawnYPosition=200;
 

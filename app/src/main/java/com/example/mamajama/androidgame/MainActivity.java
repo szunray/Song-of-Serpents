@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
     public static int SCREEN_WIDTH = 1200;
     public static int SCREEN_HEIGHT = 1600;
 
+
     GameView gameView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +75,10 @@ public class MainActivity extends Activity {
         int h = (SCREEN_HEIGHT/TILE_HEIGHT);
 
         int map[] = new int[(w*h)];
+        Tile grid[]= new Tile[(w*h)];
+
+
+
 
 
 
@@ -93,6 +98,12 @@ public class MainActivity extends Activity {
             //instantiating Pawn
            Lamia = new Pawn(context, "lamiawalk");
 
+           //Instancing grid
+            for(int x=0; x<grid.length; x++){
+                int xpos= (x%w)*TILE_WIDTH;
+                int ypos= (x/w)*TILE_HEIGHT;
+                grid[x]=new Tile(context,xpos,ypos);
+            }
 
     }
 
@@ -181,13 +192,57 @@ public class MainActivity extends Activity {
                 // Make the text a bit bigger
                 paint.setTextSize(45);
 
+                for(int x=0;x<grid.length;x++){
+                    grid[x].reset();
+                }
+
+                int currentX=(int) Lamia.pawnXPosition/200;
+                int currentY=(int) Lamia.pawnYPosition/200;
+                int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
+                int positionInArray= (currentY*numberOfColumns)+currentX;
+                System.out.print("currently at block "+positionInArray);
+                grid[positionInArray].setType(1);
+                for(int x=0;x<grid.length;x++){
+                    double Distance = Math.sqrt(Math.pow((Lamia.pawnXPosition-grid[x].posX),2)+Math.pow((Lamia.pawnYPosition-grid[x].posY),2));
+                    if (Distance < Lamia.pawnMoveSpeed){
+                        grid[x].setType(1);
+                    }
+                }
+
 
                 for(int x=0; x<map.length; x++){
                     float xpos= (x%w)*TILE_WIDTH;
                     float ypos= (x/w)*TILE_HEIGHT;
                     Bitmap tile = BitmapFactory.decodeResource(this.getResources(),R.drawable.grasscenterblock);
-                    canvas.drawBitmap(tile,xpos,ypos,paint);
+                    canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
                 }
+//------------------------------------------------------------------------
+                //Fiddling with isometry
+                //Drawing lines to represent top down grid
+                //to see how they fit over current map
+                int countW=SCREEN_WIDTH/TILE_WIDTH;
+                for (int i=0; i<=countW;i++){
+                    //canvas.drawLine(0, 0, 200, 200, paint);
+                    canvas.drawLine((float)(i*TILE_WIDTH),0,(float)(i*TILE_WIDTH),(float)(SCREEN_WIDTH),paint);
+                }
+                // The following code snippet produces an isometric grid
+            /*
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.GREEN);// Needs to be changes to work with Canvas
+                int width = getWidth();
+                int height = getHeight();
+                int sizeW = 50;
+                int sizeH = 50;
+                int countW = width / sizeW;
+                int countH = height / sizeH;
+
+                for (int i = 0; i <= countW + countH; i++) {
+                    g.drawLine(0, i * sizeH, i * sizeH, 0);
+                    g.drawLine(width - i * sizeW, 0, width, i * sizeW);
+                }*/
+//--------------------------------------------------------------------------------------
+
 
                 // Display the current fps on the screen
                 canvas.drawText("FPS:" + fps, 20, 40, paint);

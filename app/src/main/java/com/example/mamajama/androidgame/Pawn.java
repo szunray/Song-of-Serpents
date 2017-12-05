@@ -22,10 +22,10 @@ public class Pawn {
 
     //Moving some attributes to the pawn itself
     float pawnMoveSpeed=400;
-    float pawnXPosition=0;
+    float pawnXPosition=200;
     float pawnYPosition=200;
 
-    float destination[] = {0,200};
+    float destination[] = {200,200};
 
     boolean isMoving=false;
 

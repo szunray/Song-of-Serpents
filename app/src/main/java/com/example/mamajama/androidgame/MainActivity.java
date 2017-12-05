@@ -96,16 +96,16 @@ public class MainActivity extends Activity {
             paint = new Paint();
 
             //instantiating Pawn
-           Lamia = new Pawn(context, "lamiawalk");
+            Lamia = new Pawn(context, "lamiawalk");
 
-           //Instancing grid
+            //Instancing grid
             for(int x=0; x<grid.length; x++){
                 int xpos= (x%w)*TILE_WIDTH;
                 int ypos= (x/w)*TILE_HEIGHT;
                 grid[x]=new Tile(context,xpos,ypos);
             }
 
-    }
+        }
 
 
         @Override
@@ -151,6 +151,13 @@ public class MainActivity extends Activity {
                     // Here I'm taking the location of the event to send to pawn
                     float x = Math.round(motionEvent.getX()/TILE_WIDTH)*TILE_WIDTH;
                     float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;
+
+                    int fingerRow=(int)x/TILE_WIDTH;
+                    int fingerColumn=(int)y/TILE_HEIGHT;
+                    int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
+                    int numberOfRows=SCREEN_HEIGHT/TILE_HEIGHT;
+                    int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
+                    if(grid[positionInArray].type==1)
                     Lamia.setDestination(x,y);
 
                     // Set isMoving so the Lamia does not move
@@ -236,7 +243,6 @@ public class MainActivity extends Activity {
                 int sizeH = 50;
                 int countW = width / sizeW;
                 int countH = height / sizeH;
-
                 for (int i = 0; i <= countW + countH; i++) {
                     g.drawLine(0, i * sizeH, i * sizeH, 0);
                     g.drawLine(width - i * sizeW, 0, width, i * sizeW);

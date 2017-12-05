@@ -12,7 +12,7 @@ public class Pawn {
     // an array of images comprising the frames of an animation
     //There will eventually be 5 for every pawn
     //one for facing, away, to the left, to the right, and an idle animation
-     Bitmap[] animation = new Bitmap[5];
+    Bitmap[] animation = new Bitmap[5];
 
     //Use frametimer and fps to determine if an animation should update.
     //increase frameTimer for slower animations theoretically
@@ -31,7 +31,7 @@ public class Pawn {
 
 
     //current frame is the index of the image in our animation array to use
-     int currentFrame ;
+    int currentFrame ;
     private int frameCount = animation.length;
 
 
@@ -53,7 +53,7 @@ public class Pawn {
         isMoving=false;
         if (destination[0]>pawnXPosition){
             isMoving=true;
-           pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
+            pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
         }
         else if (destination[0]<pawnXPosition){
             isMoving=true;

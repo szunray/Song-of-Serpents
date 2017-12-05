@@ -24,7 +24,21 @@ public class MainActivity extends Activity {
     public static int SCREEN_WIDTH = 1200;
     public static int SCREEN_HEIGHT = 1600;
 
+//Cartesian to isometric:
+public int[] carToIso(int cartX, int cartY) {
+    int isoX = cartX - cartY;
+    int isoY = (cartX + cartY) / 2;
+    int[] ans={isoX,isoY};
+    return ans;
+}
 
+//Isometric to Cartesian:
+public int[] isoToCar(int isoX, int isoY) {
+    int cartX = (2 * isoY + isoX) / 2;
+    int cartY = (2 * isoY - isoX) / 2;
+    int ans[]={cartX,cartY};
+    return ans;
+}
     GameView gameView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

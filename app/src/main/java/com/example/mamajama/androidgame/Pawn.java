@@ -53,19 +53,19 @@ public class Pawn {
         isMoving=false;
         if (destination[0]>pawnXPosition){
             isMoving=true;
-            pawnXPosition = pawnXPosition + (pawnMoveSpeed / fps);
+            pawnXPosition = pawnXPosition + (pawnMoveSpeed/2 / fps);
         }
         else if (destination[0]<pawnXPosition){
             isMoving=true;
-            pawnXPosition = pawnXPosition - (pawnMoveSpeed / fps);
+            pawnXPosition = pawnXPosition - (pawnMoveSpeed/2 / fps);
         }
         if (destination[1]>pawnYPosition){
             isMoving=true;
-            pawnYPosition=pawnYPosition+(pawnMoveSpeed/fps);
+            pawnYPosition=pawnYPosition+(pawnMoveSpeed/2/fps);
         }
         else if(destination[1]<pawnYPosition){
             isMoving=true;
-            pawnYPosition=pawnYPosition-(pawnMoveSpeed/fps);
+            pawnYPosition=pawnYPosition-(pawnMoveSpeed/2/fps);
         }
 
 

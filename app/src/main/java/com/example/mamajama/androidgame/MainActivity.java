@@ -165,14 +165,15 @@ public int[] isoToCar(int isoX, int isoY) {
                     // Here I'm taking the location of the event to send to pawn
                     float x = Math.round(motionEvent.getX()/TILE_WIDTH)*TILE_WIDTH;
                     float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;
+                    int [] cartesianClick=isoToCar((int) x,(int) y);
 
-                    int fingerRow=(int)x/TILE_WIDTH;
-                    int fingerColumn=(int)y/TILE_HEIGHT;
+                    int fingerRow=cartesianClick[0]/TILE_WIDTH;
+                    int fingerColumn=cartesianClick[1]/TILE_HEIGHT;
                     int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
                     int numberOfRows=SCREEN_HEIGHT/TILE_HEIGHT;
                     int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
                     if(grid[positionInArray].type==1)
-                    Lamia.setDestination(x,y);
+                    Lamia.setDestination(cartesianClick[0],cartesianClick[1]);
 
                     // Set isMoving so the Lamia does not move
                     isMoving = false;
@@ -231,11 +232,12 @@ public int[] isoToCar(int isoX, int isoY) {
                 }
 
 
-                for(int x=0; x<map.length; x++){
+                for(int x=0; x<grid.length; x++){
                     float xpos= (x%w)*TILE_WIDTH;
                     float ypos= (x/w)*TILE_HEIGHT;
-                    Bitmap tile = BitmapFactory.decodeResource(this.getResources(),R.drawable.grasscenterblock);
-                    canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
+                    int[] isoTile=carToIso(grid[x].posX,grid[x].posY);
+                    canvas.drawBitmap(grid[x].bitmap,isoTile[0],isoTile[1],paint);
+                    //canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
                 }
 //------------------------------------------------------------------------
                 //Fiddling with isometry
@@ -271,7 +273,9 @@ public int[] isoToCar(int isoX, int isoY) {
 
 
                 //draw the lamia at the proper position
-                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
+                int [] isoPawn= carToIso((int)Lamia.getX(),(int)Lamia.getY());
+                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], isoPawn[0], isoPawn[1], paint);
+                //canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
 
 
 

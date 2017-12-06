@@ -23,6 +23,10 @@ public class MainActivity extends Activity {
     public static int TILE_HEIGHT = 200;
     public static int SCREEN_WIDTH = 1200;
     public static int SCREEN_HEIGHT = 1600;
+    public static int X_OFFSET=0;
+    public static int CAMERA_X=600;
+    public static int CAMERA_Y=0;
+
 
 //Cartesian to isometric:
 public int[] carToIso(int cartX, int cartY) {
@@ -77,6 +81,7 @@ public int[] isoToCar(int isoX, int isoY) {
 
         //TESTING Pawn
         //Trying to instance a new pawn:
+        //Not sure how pawns will spawn in final game
         Pawn Lamia;
 
         //Lamia is not moving at the start
@@ -116,7 +121,7 @@ public int[] isoToCar(int isoX, int isoY) {
             for(int x=0; x<grid.length; x++){
                 int xpos= (x%w)*TILE_WIDTH;
                 int ypos= (x/w)*TILE_HEIGHT;
-                grid[x]=new Tile(context,xpos,ypos);
+                grid[x]=new Tile(context.getApplicationContext(),xpos,ypos);
             }
 
         }
@@ -163,18 +168,26 @@ public int[] isoToCar(int isoX, int isoY) {
                 // Player has removed finger from screen
                 case MotionEvent.ACTION_UP:
                     // Here I'm taking the location of the event to send to pawn
-                    float x = Math.round(motionEvent.getX()/TILE_WIDTH)*TILE_WIDTH;
-                    float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;
-                    int [] cartesianClick=isoToCar((int) x,(int) y);
+                    /*float x = Math.round((motionEvent.getX())/TILE_WIDTH)*TILE_WIDTH;
+                    float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;*/
+                    int [] isoCam=carToIso(CAMERA_X,CAMERA_Y);
+                    int [] cartesianClick=isoToCar((int) motionEvent.getX()-isoCam[0],(int) (motionEvent.getY()-isoCam[1]));
+
+
+
+                    cartesianClick[0]=Math.round((cartesianClick[0])/TILE_WIDTH)*TILE_WIDTH;
+                    cartesianClick[1]=Math.round((cartesianClick[1])/TILE_HEIGHT)*TILE_HEIGHT;
 
                     int fingerRow=cartesianClick[0]/TILE_WIDTH;
                     int fingerColumn=cartesianClick[1]/TILE_HEIGHT;
                     int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
                     int numberOfRows=SCREEN_HEIGHT/TILE_HEIGHT;
                     int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
-                    if(grid[positionInArray].type==1)
-                    Lamia.setDestination(cartesianClick[0],cartesianClick[1]);
+                    if(positionInArray > 0 && positionInArray<grid.length) {
 
+                        if (grid[positionInArray].type == 1)
+                            Lamia.setDestination(cartesianClick[0], cartesianClick[1]);
+                    }
                     // Set isMoving so the Lamia does not move
                     isMoving = false;
                     break;
@@ -183,6 +196,9 @@ public int[] isoToCar(int isoX, int isoY) {
 
 
         }
+
+
+
 
 
         public void update(long time) {
@@ -205,11 +221,17 @@ public int[] isoToCar(int isoX, int isoY) {
                 // Make the drawing surface our canvas object
                 canvas = ourHolder.lockCanvas();
 
+
+
                 // Draw the background color
                 canvas.drawColor(Color.argb(255, 26, 128, 182));
 
                 // Choose the brush color for drawing
                 paint.setColor(Color.argb(255, 249, 129, 0));
+
+                //would be nice to find a new background image
+                Bitmap Backdrop=BitmapFactory.decodeResource(this.getResources(),R.drawable.cloud);
+                canvas.drawBitmap(Backdrop,0,0,paint);
 
                 // Make the text a bit bigger
                 paint.setTextSize(45);
@@ -224,45 +246,30 @@ public int[] isoToCar(int isoX, int isoY) {
                 int positionInArray= (currentY*numberOfColumns)+currentX;
                 System.out.print("currently at block "+positionInArray);
                 grid[positionInArray].setType(1);
+
+
                 for(int x=0;x<grid.length;x++){
                     double Distance = Math.sqrt(Math.pow((Lamia.pawnXPosition-grid[x].posX),2)+Math.pow((Lamia.pawnYPosition-grid[x].posY),2));
                     if (Distance < Lamia.pawnMoveSpeed){
                         grid[x].setType(1);
                     }
                 }
-
+                CAMERA_Y=(int)-Lamia.getY()+600;
+                CAMERA_X=(int)-Lamia.getX()+1000;
+                int[] Cam=carToIso(CAMERA_X,CAMERA_Y);
+                //canvas.translate(CAMERA_X,CAMERA_Y);
+                canvas.translate(Cam[0],Cam[1]);
 
                 for(int x=0; x<grid.length; x++){
-                    float xpos= (x%w)*TILE_WIDTH;
+                    float xpos= ((x%w)*TILE_WIDTH);
                     float ypos= (x/w)*TILE_HEIGHT;
-                    int[] isoTile=carToIso(grid[x].posX,grid[x].posY);
+                    int[] isoTile=carToIso(grid[x].posX+X_OFFSET,grid[x].posY);
                     canvas.drawBitmap(grid[x].bitmap,isoTile[0],isoTile[1],paint);
+                    canvas.drawText("Tile#"+x, isoTile[0],isoTile[1],paint);
                     //canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
                 }
 //------------------------------------------------------------------------
-                //Fiddling with isometry
-                //Drawing lines to represent top down grid
-                //to see how they fit over current map
-                int countW=SCREEN_WIDTH/TILE_WIDTH;
-                for (int i=0; i<=countW;i++){
-                    //canvas.drawLine(0, 0, 200, 200, paint);
-                    canvas.drawLine((float)(i*TILE_WIDTH),0,(float)(i*TILE_WIDTH),(float)(SCREEN_WIDTH),paint);
-                }
-                // The following code snippet produces an isometric grid
-            /*
-            public void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(Color.GREEN);// Needs to be changes to work with Canvas
-                int width = getWidth();
-                int height = getHeight();
-                int sizeW = 50;
-                int sizeH = 50;
-                int countW = width / sizeW;
-                int countH = height / sizeH;
-                for (int i = 0; i <= countW + countH; i++) {
-                    g.drawLine(0, i * sizeH, i * sizeH, 0);
-                    g.drawLine(width - i * sizeW, 0, width, i * sizeW);
-                }*/
+
 //--------------------------------------------------------------------------------------
 
 
@@ -273,14 +280,19 @@ public int[] isoToCar(int isoX, int isoY) {
 
 
                 //draw the lamia at the proper position
-                int [] isoPawn= carToIso((int)Lamia.getX(),(int)Lamia.getY());
-                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], isoPawn[0], isoPawn[1], paint);
+                int [] isoPawn= carToIso((int)Lamia.getX(),(int)Lamia.getY());// This +200 here? No idea why it works
+
+                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
+
+
                 //canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
+
 
 
 
                 // Draw everything to the screen
                 // and unlock the drawing surface
+
                 ourHolder.unlockCanvasAndPost(canvas);
             }
         }

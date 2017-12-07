@@ -14,8 +14,8 @@ public class Tile {
     int posX, posY, centX, centY, type;
     Bitmap tileType[];
     Bitmap bitmap;
-   /* Boolean isOccupied=false;
-    Pawn pawn;*/
+    Boolean isOccupied=false;
+    Pawn pawn;
 
 
     public Tile(Context context, int Xpos, int Ypos){
@@ -50,9 +50,10 @@ public class Tile {
     public void reset(){
         type=0;
         bitmap=tileType[type];
+        Vacate();
 
     }
-    /*
+
     public void setIsOccupied(Pawn thing){
         pawn=thing;
         isOccupied=true;
@@ -60,7 +61,7 @@ public class Tile {
     public void Vacate(){
         pawn=null;
         isOccupied=false;
-    }*/
+    }
 
 
 

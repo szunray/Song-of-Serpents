@@ -15,6 +15,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.os.Bundle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends Activity {
 
@@ -83,8 +86,10 @@ public int[] isoToCar(int isoX, int isoY) {
         //TESTING Pawn
         //Trying to instance a new pawn:
         //Not sure how pawns will spawn in final game
+        List<Pawn> allPawns=new ArrayList<Pawn>();
         Pawn activePawn;
         Pawn Lamia;
+        Pawn Handoff;
 
         //Lamia is not moving at the start
         boolean isMoving = false;
@@ -117,10 +122,14 @@ public int[] isoToCar(int isoX, int isoY) {
             paint = new Paint();
 
             //instantiating Pawn
-           // Lamia = new Pawn(context, "lamiawalk");
+            Lamia = new Pawn(context, "lamiawalk");
+            Lamia.setDestination(400,400);
             /*activePawn= new Pawn(context.getApplicationContext(),"lamiawalk");
             activePawn.setDestination(-200,-200);*/
             activePawn=new Pawn(context,"lamiawalk");
+            Handoff=activePawn;
+            allPawns.add(activePawn);
+            allPawns.add(Lamia);
 
             //Instancing grid
             for(int x=0; x<grid.length; x++){
@@ -191,13 +200,21 @@ public int[] isoToCar(int isoX, int isoY) {
                     int numberOfRows=SCREEN_HEIGHT/TILE_HEIGHT;
                     int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
                     if(positionInArray >= 0 && positionInArray<grid.length) {
-
-                        if (grid[positionInArray].type == 1)
-                            activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
-                    }
-                        if (positionInArray==8){
-                        //activePawn=Lamia;
+                        if (grid[positionInArray].isOccupied){
+                            Handoff=activePawn;
+                            activePawn=grid[positionInArray].pawn;
+                            Lamia=Handoff;
+                           break;
                         }
+
+                        if (grid[positionInArray].type == 1){
+                            activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
+
+                        }
+
+
+                    }
+
                     // Set isMoving so the Lamia does not move
                     //isMoving = false;
                     break;
@@ -257,6 +274,12 @@ public int[] isoToCar(int isoX, int isoY) {
                 System.out.print("currently at block "+positionInArray);
                 try{
                 grid[positionInArray].setType(1);
+                grid[positionInArray].setIsOccupied(activePawn);
+                     currentX=(int) Lamia.pawnXPosition/200;
+                     currentY=(int) Lamia.pawnYPosition/200;
+                    positionInArray= (currentY*numberOfColumns)+currentX;
+                    grid[positionInArray].setIsOccupied(Lamia);
+
 
 
                 for(int x=0;x<grid.length;x++){
@@ -295,12 +318,18 @@ public int[] isoToCar(int isoX, int isoY) {
 
 
                 //draw the lamia at the proper position
-                int [] isoPawn= carToIso((int)activePawn.getX(),(int)activePawn.getY());// This +200 here? No idea why it works
+                for (Pawn temp: allPawns){
+                    int [] isoPawn= carToIso((int)temp.getX(),(int)temp.getY());
+                    canvas.drawBitmap(temp.animation[temp.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
+                }
+                /*int [] isoPawn= carToIso((int)activePawn.getX(),(int)activePawn.getY());
+                int [] isoLamia= carToIso((int)Lamia.getX(),(int)Lamia.getY());
 
+                // This -100 Just makes the sprites sit better
                 canvas.drawBitmap(activePawn.animation[activePawn.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
 
 
-               // canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
+                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], isoLamia[0], isoLamia[1]-100, paint);*/
 
 
 

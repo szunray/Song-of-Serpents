@@ -24,7 +24,8 @@ public class MainActivity extends Activity {
     public static int SCREEN_WIDTH = 1200;
     public static int SCREEN_HEIGHT = 1600;
     public static int X_OFFSET=0;
-    public static int CAMERA_X=600;
+    //Camera offsets are set right before the Pawn is Drawn
+    public static int CAMERA_X=0;
     public static int CAMERA_Y=0;
 
 
@@ -82,6 +83,7 @@ public int[] isoToCar(int isoX, int isoY) {
         //TESTING Pawn
         //Trying to instance a new pawn:
         //Not sure how pawns will spawn in final game
+        Pawn activePawn;
         Pawn Lamia;
 
         //Lamia is not moving at the start
@@ -115,7 +117,10 @@ public int[] isoToCar(int isoX, int isoY) {
             paint = new Paint();
 
             //instantiating Pawn
-            Lamia = new Pawn(context, "lamiawalk");
+           // Lamia = new Pawn(context, "lamiawalk");
+            /*activePawn= new Pawn(context.getApplicationContext(),"lamiawalk");
+            activePawn.setDestination(-200,-200);*/
+            activePawn=new Pawn(context,"lamiawalk");
 
             //Instancing grid
             for(int x=0; x<grid.length; x++){
@@ -161,15 +166,17 @@ public int[] isoToCar(int isoX, int isoY) {
                 case MotionEvent.ACTION_DOWN:
 
                     // Set isMoving so the Lamia is moved in the update method
-                    isMoving = true;
+                    //isMoving = true;
 
                     break;
 
                 // Player has removed finger from screen
                 case MotionEvent.ACTION_UP:
-                    // Here I'm taking the location of the event to send to pawn
-                    /*float x = Math.round((motionEvent.getX())/TILE_WIDTH)*TILE_WIDTH;
-                    float y = Math.round(motionEvent.getY()/TILE_HEIGHT)*TILE_HEIGHT;*/
+
+                    /*So the camera translates the canvas isometrically
+                    * We find what the isometric camera position would be, subtract those values
+                    * from the input (a click on an isometric grid), and THEN find the cartesian
+                    * coordinates of that input.*/
                     int [] isoCam=carToIso(CAMERA_X,CAMERA_Y);
                     int [] cartesianClick=isoToCar((int) motionEvent.getX()-isoCam[0],(int) (motionEvent.getY()-isoCam[1]));
 
@@ -183,13 +190,16 @@ public int[] isoToCar(int isoX, int isoY) {
                     int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
                     int numberOfRows=SCREEN_HEIGHT/TILE_HEIGHT;
                     int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
-                    if(positionInArray > 0 && positionInArray<grid.length) {
+                    if(positionInArray >= 0 && positionInArray<grid.length) {
 
                         if (grid[positionInArray].type == 1)
-                            Lamia.setDestination(cartesianClick[0], cartesianClick[1]);
+                            activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
                     }
+                        if (positionInArray==8){
+                        //activePawn=Lamia;
+                        }
                     // Set isMoving so the Lamia does not move
-                    isMoving = false;
+                    //isMoving = false;
                     break;
             }
             return true;
@@ -204,10 +214,10 @@ public int[] isoToCar(int isoX, int isoY) {
         public void update(long time) {
 
             //If Lamia is moving, then move her to the right
-            Lamia.move();
-            if (Lamia.isMoving) {
+            activePawn.move();
+            if (activePawn.isMoving) {
                 //lamiaXPosition = lamiaXPosition + (walkSpeedPerSecond / fps);
-                Lamia.animate(time);
+                activePawn.animate(time);
             }
 
 
@@ -239,23 +249,28 @@ public int[] isoToCar(int isoX, int isoY) {
                 for(int x=0;x<grid.length;x++){
                     grid[x].reset();
                 }
-
-                int currentX=(int) Lamia.pawnXPosition/200;
-                int currentY=(int) Lamia.pawnYPosition/200;
+                //highlight the square beneath the active pawn
+                int currentX=(int) activePawn.pawnXPosition/200;
+                int currentY=(int) activePawn.pawnYPosition/200;
                 int numberOfColumns= SCREEN_WIDTH/TILE_WIDTH;
                 int positionInArray= (currentY*numberOfColumns)+currentX;
                 System.out.print("currently at block "+positionInArray);
+                try{
                 grid[positionInArray].setType(1);
 
 
                 for(int x=0;x<grid.length;x++){
-                    double Distance = Math.sqrt(Math.pow((Lamia.pawnXPosition-grid[x].posX),2)+Math.pow((Lamia.pawnYPosition-grid[x].posY),2));
-                    if (Distance < Lamia.pawnMoveSpeed){
+                    double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition-grid[x].posX),2)+Math.pow((activePawn.pawnYPosition-grid[x].posY),2));
+                    if (Distance < activePawn.pawnMoveSpeed){
                         grid[x].setType(1);
                     }
                 }
-                CAMERA_Y=(int)-Lamia.getY()+600;
-                CAMERA_X=(int)-Lamia.getX()+1000;
+                }catch (IndexOutOfBoundsException e) {
+                    System.err.println("IndexOutOfBoundsException: " + e.getMessage());
+                }
+
+                CAMERA_Y=(int)-activePawn.getY()+600;
+                CAMERA_X=(int)-activePawn.getX()+1000;
                 int[] Cam=carToIso(CAMERA_X,CAMERA_Y);
                 //canvas.translate(CAMERA_X,CAMERA_Y);
                 canvas.translate(Cam[0],Cam[1]);
@@ -280,12 +295,12 @@ public int[] isoToCar(int isoX, int isoY) {
 
 
                 //draw the lamia at the proper position
-                int [] isoPawn= carToIso((int)Lamia.getX(),(int)Lamia.getY());// This +200 here? No idea why it works
+                int [] isoPawn= carToIso((int)activePawn.getX(),(int)activePawn.getY());// This +200 here? No idea why it works
 
-                canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
+                canvas.drawBitmap(activePawn.animation[activePawn.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
 
 
-                //canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
+               // canvas.drawBitmap(Lamia.animation[Lamia.currentFrame], Lamia.getX(), Lamia.getY(), paint);
 
 
 

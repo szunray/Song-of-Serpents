@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
     //Camera offsets are set right before the Pawn is Drawn
     public static int CAMERA_X=0;
     public static int CAMERA_Y=0;
+    private float firstX,firstY;
+    public boolean isPanning = false;
 
 
 //Cartesian to isometric:
@@ -172,15 +174,18 @@ public int[] isoToCar(int isoX, int isoY) {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
 
                 // Player has touched the screen
-                case MotionEvent.ACTION_DOWN:
+               /* case MotionEvent.ACTION_DOWN:
 
                     // Set isMoving so the Lamia is moved in the update method
                     //isMoving = true;
 
-                    break;
+                    break;*/
 
                 // Player has removed finger from screen
-                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_DOWN:
+
+                     firstX=motionEvent.getX();
+                     firstY=motionEvent.getY();
 
                     /*So the camera translates the canvas isometrically
                     * We find what the isometric camera position would be, subtract those values
@@ -201,10 +206,12 @@ public int[] isoToCar(int isoX, int isoY) {
                     int positionInArray= (fingerColumn*numberOfColumns)+fingerRow;
                     if(positionInArray >= 0 && positionInArray<grid.length) {
                         if (grid[positionInArray].isOccupied){
-                            Handoff=activePawn;
+                            //Handoff=activePawn;
                             activePawn=grid[positionInArray].pawn;
-                            Lamia=Handoff;
-                           break;
+                            isPanning=false;
+                            //Lamia=Handoff;
+
+
                         }
 
                         if (grid[positionInArray].type == 1){
@@ -218,6 +225,32 @@ public int[] isoToCar(int isoX, int isoY) {
                     // Set isMoving so the Lamia does not move
                     //isMoving = false;
                     break;
+                case MotionEvent.ACTION_MOVE: {
+
+
+                    // Find the index of the active pointer and fetch its position
+                    //final int pointerIndex =
+                          // MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+                    isPanning=true;
+                    final float activeX = motionEvent.getX();
+                    final float activeY = motionEvent.getY();
+
+                    // Calculate the distance moved
+
+                         float dx = activeX - firstX;
+                         float dy = activeY - firstY;
+                    int [] distance=isoToCar((int)dx,(int)dy);
+                    CAMERA_X+= distance[0];
+                    CAMERA_Y += distance[1];
+
+                    invalidate();
+
+                    // Remember this touch position for the next move event
+                    firstX = activeX;
+                    firstY = activeY;
+
+                    break;
+                }
             }
             return true;
 
@@ -274,11 +307,11 @@ public int[] isoToCar(int isoX, int isoY) {
                 System.out.print("currently at block "+positionInArray);
                 try{
                 grid[positionInArray].setType(1);
-                grid[positionInArray].setIsOccupied(activePawn);
+                /*grid[positionInArray].setIsOccupied(activePawn);
                      currentX=(int) Lamia.pawnXPosition/200;
                      currentY=(int) Lamia.pawnYPosition/200;
                     positionInArray= (currentY*numberOfColumns)+currentX;
-                    grid[positionInArray].setIsOccupied(Lamia);
+                    grid[positionInArray].setIsOccupied(Lamia);*/
 
 
 
@@ -291,9 +324,10 @@ public int[] isoToCar(int isoX, int isoY) {
                 }catch (IndexOutOfBoundsException e) {
                     System.err.println("IndexOutOfBoundsException: " + e.getMessage());
                 }
-
-                CAMERA_Y=(int)-activePawn.getY()+600;
-                CAMERA_X=(int)-activePawn.getX()+1000;
+                if (isPanning==false) {
+                    CAMERA_Y=(int)-activePawn.getY()+600;
+                    CAMERA_X=(int)-activePawn.getX()+1000;
+                }
                 int[] Cam=carToIso(CAMERA_X,CAMERA_Y);
                 //canvas.translate(CAMERA_X,CAMERA_Y);
                 canvas.translate(Cam[0],Cam[1]);
@@ -321,6 +355,10 @@ public int[] isoToCar(int isoX, int isoY) {
                 for (Pawn temp: allPawns){
                     int [] isoPawn= carToIso((int)temp.getX(),(int)temp.getY());
                     canvas.drawBitmap(temp.animation[temp.currentFrame], isoPawn[0], isoPawn[1]-100, paint);
+                    currentX=(int) temp.pawnXPosition/200;
+                    currentY=(int) temp.pawnYPosition/200;
+                    positionInArray= (currentY*numberOfColumns)+currentX;
+                    grid[positionInArray].setIsOccupied(temp);
                 }
                 /*int [] isoPawn= carToIso((int)activePawn.getX(),(int)activePawn.getY());
                 int [] isoLamia= carToIso((int)Lamia.getX(),(int)Lamia.getY());

@@ -13,6 +13,7 @@ public class Pawn {
     //There will eventually be 5 for every pawn
     //one for facing, away, to the left, to the right, and an idle animation
     Bitmap[] animation = new Bitmap[5];
+    Bitmap portrait;
 
     //Use frametimer and fps to determine if an animation should update.
     //increase frameTimer for slower animations theoretically
@@ -28,6 +29,7 @@ public class Pawn {
     float destination[] = {200,200};
 
     boolean isMoving=false;
+    boolean hasMoved=false;
 
 
     //current frame is the index of the image in our animation array to use
@@ -50,7 +52,10 @@ public class Pawn {
         destination[1]=Yposition;
     }
     public void move(){
-        isMoving=false;
+        if (destination[0]==pawnXPosition&&destination[1]==pawnYPosition&&isMoving==false){
+            isMoving=false;
+            return;
+        }
         if (destination[0]>pawnXPosition){
             isMoving=true;
             pawnXPosition = pawnXPosition + (pawnMoveSpeed/2 / fps);
@@ -66,6 +71,10 @@ public class Pawn {
         else if(destination[1]<pawnYPosition){
             isMoving=true;
             pawnYPosition=pawnYPosition-(pawnMoveSpeed/2/fps);
+        }
+        if (destination[0]==pawnXPosition&&destination[1]==pawnYPosition&&isMoving){
+            isMoving=false;
+            hasMoved=true;
         }
 
 
@@ -90,8 +99,9 @@ public class Pawn {
 
 
 
-        }
 
+        }
+        portrait= Bitmap.createScaledBitmap(animation[0],200,200,false);
         currentFrame=0;
         frameTimer=10;
         fps=10;
@@ -107,7 +117,9 @@ public class Pawn {
 
 
 
+
         }
+        portrait= Bitmap.createScaledBitmap(animation[0],200,200,false);
         pawnXPosition=x;
         pawnYPosition=y;
         setDestination(x,y);

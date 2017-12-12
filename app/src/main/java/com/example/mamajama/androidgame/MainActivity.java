@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +34,7 @@ public class MainActivity extends Activity {
     GameView gameView;
     private float firstX, firstY;
 
+    int playerIndex=0;// Should make player a class in the future
     //Cartesian to isometric:
     public int[] carToIso(int cartX, int cartY) {
         int isoX = cartX - cartY;
@@ -212,19 +215,21 @@ public class MainActivity extends Activity {
                     int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
                     int numberOfRows = SCREEN_HEIGHT / TILE_HEIGHT;
 
-                    int positionInArray = (fingerColumn * numberOfColumns) + fingerRow;
-                    if (positionInArray >= 0 && positionInArray < grid.length) {
-                        if (grid[positionInArray].isOccupied) {
-                            activePawn = grid[positionInArray].pawn;
-                            isPanning = false;
+                    if(activePawn.isMoving==false) {
+                        int positionInArray = (fingerColumn * numberOfColumns) + fingerRow;
+                        if (positionInArray >= 0 && positionInArray < grid.length) {
+                            if (grid[positionInArray].isOccupied) {
+                                activePawn = grid[positionInArray].pawn;
+                                isPanning = false;
+                            }
+
+                            if (grid[positionInArray].type == 1) {
+                                activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
+
+                            }
+
+
                         }
-
-                        if (grid[positionInArray].type == 1) {
-                            activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
-
-                        }
-
-
                     }
 
 
@@ -272,7 +277,14 @@ public class MainActivity extends Activity {
                 int positionInArray = (currentY * numberOfColumns) + currentX;
                 grid[positionInArray].setIsOccupied(temp);
             }
-
+            if (activePawn.hasMoved){
+                if (playerIndex<allPawns.size()-1)
+                playerIndex+=1;
+                else
+                    playerIndex=0;
+                if(allPawns.get(playerIndex).hasMoved==false)
+                activePawn=allPawns.get(playerIndex);
+            }
             for (int x = 0; x < grid.length; x++) {
                 double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition - grid[x].posX), 2) + Math.pow((activePawn.pawnYPosition - grid[x].posY), 2));
                 if (Distance < activePawn.pawnMoveSpeed) {
@@ -357,7 +369,27 @@ public class MainActivity extends Activity {
                 //So UI is going to be objects that get drawn last.
                 //They're based on the isometric camera location, so they should remain "static"
                 //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
-                canvas.drawRect(-Cam[0],-Cam[1],200-Cam[0],200-Cam[1],paint);
+                canvas.drawRect(-Cam[0],-Cam[1],400-Cam[0],200-Cam[1],paint);
+                int pawnIndex=0;
+                for(Pawn temp: allPawns){
+                    if (temp.hasMoved)
+                    {
+                        ColorMatrix cm = new ColorMatrix();
+                        cm.setSaturation(0);
+                        ColorMatrixColorFilter f = new ColorMatrixColorFilter (cm);
+                        paint.setColorFilter(f);
+
+                    }
+                    else{
+                        paint.setColorFilter(null);
+                    }
+                    canvas.drawBitmap(temp.portrait,-Cam[0]+pawnIndex*200,-Cam[1],paint);
+
+                    pawnIndex+=1;
+                }
+                pawnIndex=0;
+                paint.setColorFilter(null);
+                //canvas.drawBitmap(activePawn.portrait,-Cam[0],-Cam[1],paint);
                 //protoUI
 
                 ourHolder.unlockCanvasAndPost(canvas);

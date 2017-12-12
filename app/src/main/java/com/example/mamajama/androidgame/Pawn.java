@@ -87,11 +87,31 @@ public class Pawn {
             String nameOfImage = animationPrefix+"_"+(x+1);
             int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
             animation[x] = BitmapFactory.decodeResource(resources,resId);
-            //animation[x] = BitmapFactory.decodeResource(context.getResources(), R.drawable.lamia_02);
+
 
 
         }
 
+        currentFrame=0;
+        frameTimer=10;
+        fps=10;
+
+    }
+    public Pawn(Context context, String animationPrefix,float x, float y){
+
+        for(int i=0; i<5; i++){
+            Resources resources = context.getResources();
+            String nameOfImage = animationPrefix+"_"+(i+1);
+            int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
+            animation[i] = BitmapFactory.decodeResource(resources,resId);
+
+
+
+        }
+        pawnXPosition=x;
+        pawnYPosition=y;
+        setDestination(x,y);
+        pawnMoveSpeed=400;
         currentFrame=0;
         frameTimer=10;
         fps=10;

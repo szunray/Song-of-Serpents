@@ -79,6 +79,7 @@ public class MainActivity extends Activity {
 
     class GameView extends SurfaceView implements Runnable {
 
+
         // Our Thread
         Thread gameThread = null;
 
@@ -191,7 +192,15 @@ public class MainActivity extends Activity {
                     /*We find what the isometric camera offsets would be, subtract those values
                     * from the input (which was made on an isometric grid), and THEN find the cartesian
                     * coordinates of that input.*/
+
+                    //First checks to see if the click was inside of any UI elements
+                    //Theres only one now, and orange square.
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
+                    if (firstX<-isoCam[0]+200 && firstY<-isoCam[1]+200){
+                        break;
+                        //here we'd have the click do the UI stuff. For now, it just breaks
+                        //You cant click the space behind the orange block.
+                    }
                     int[] cartesianClick = isoToCar((int) motionEvent.getX() - isoCam[0], (int) (motionEvent.getY() - isoCam[1]));
 
 
@@ -250,7 +259,7 @@ public class MainActivity extends Activity {
 
         }
 
-
+//--------------------------------------------------------------------------------------------------
         public void update(long time) {
             for (int x = 0; x < grid.length; x++) {
                 grid[x].reset();
@@ -278,6 +287,7 @@ public class MainActivity extends Activity {
 
 
         }
+//--------------------------------------------------------------------------------------------------
 
         public void draw() {
 
@@ -316,8 +326,8 @@ public class MainActivity extends Activity {
                     System.err.println("IndexOutOfBoundsException: " + e.getMessage());
                 }
                 if (isPanning == false) {
-                    CAMERA_Y = (int) -activePawn.getY() + 600;
-                    CAMERA_X = (int) -activePawn.getX() + 1000;
+                    CAMERA_Y = (int) -activePawn.getY() + 300;
+                    CAMERA_X = (int) -activePawn.getX() + 900;
                 }
                 int[] Cam = carToIso(CAMERA_X, CAMERA_Y);
                 canvas.translate(Cam[0], Cam[1]);
@@ -330,10 +340,6 @@ public class MainActivity extends Activity {
                     canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
                     //canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
                 }
-//------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-
 
                 // Display the current fps on the screen
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
@@ -348,6 +354,11 @@ public class MainActivity extends Activity {
 
                 }
 
+                //So UI is going to be objects that get drawn last.
+                //They're based on the isometric camera location, so they should remain "static"
+                //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
+                canvas.drawRect(-Cam[0],-Cam[1],200-Cam[0],200-Cam[1],paint);
+                //protoUI
 
                 ourHolder.unlockCanvasAndPost(canvas);
             }

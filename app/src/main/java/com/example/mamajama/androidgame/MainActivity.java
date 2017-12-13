@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
             Handoff = activePawn;
             playerPawns.add(activePawn);
             playerPawns.add(Lamia);
-            directorPawns.add(enemyPawn);
+
 
             //Instancing grid
             for (int x = 0; x < grid.length; x++) {
@@ -310,7 +310,11 @@ public class MainActivity extends Activity {
             }
 
             if (playerTurn==false){
-                grid[17].setIsOccupied(directorPawns.get(0));
+                //grid[17].setIsOccupied(directorPawns.get(0));
+                //autoChase(directorPawns.get(0));
+                Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
+                enemyPawn.isAlly=false;
+                directorPawns.add(enemyPawn);
                 autoChase(directorPawns.get(0));
             }
 

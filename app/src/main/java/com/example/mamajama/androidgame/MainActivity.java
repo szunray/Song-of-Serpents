@@ -327,6 +327,12 @@ public class MainActivity extends Activity {
             if (activePawn.isMoving) {
                 activePawn.animate(time);
             }
+            for (Pawn pawn:directorPawns){
+                pawn.move();
+                if (pawn.isMoving){
+                    pawn.animate(time);
+                }
+            }
 
 
         }
@@ -477,9 +483,6 @@ public class MainActivity extends Activity {
                 //move to tile
                 pawn.setDestination(targetTile.posX,targetTile.posY);
                 pawn.move();
-                while(pawn.isMoving){
-                    pawn.move();
-                }
                 playerTurn=true;
                 resetTurn();
             }

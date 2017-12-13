@@ -22,7 +22,7 @@ public class Tile {
         posX=Xpos;
         posY=Ypos;
         type=1;
-        tileType=new Bitmap[2];
+        tileType=new Bitmap[3];
         Resources resources = context.getResources();
         String nameOfImage = "grasscenterblock";
         int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
@@ -30,6 +30,9 @@ public class Tile {
         nameOfImage = "goldblock";
         resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
         tileType[1]=BitmapFactory.decodeResource(resources,resId);
+        nameOfImage = "globe";
+        resId = context.getResources().getIdentifier(nameOfImage,"drawable",context.getPackageName());
+        tileType[2]=BitmapFactory.decodeResource(resources,resId);
         for(int x=0; x<5; x++){
 
             if (type==1){
@@ -38,12 +41,15 @@ public class Tile {
             else if (type==2){
                 bitmap=tileType[1];
             }
+            else if (type==3){
+                bitmap=tileType[2];
+            }
         }
     }
     // Theres probably a way better way to do all of this.
     public void setType(int Type){
         type=Type;
-        bitmap=tileType[type];
+        bitmap=tileType[type-1];
 
     }
 

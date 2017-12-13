@@ -3,6 +3,7 @@ import android.graphics.Bitmap;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 /**
  * Created by MamaJama on 12/1/2017.
@@ -28,8 +29,11 @@ public class Pawn {
 
     float destination[] = {200,200};
 
+    boolean isAlly=true;
     boolean isMoving=false;
     boolean hasMoved=false;
+
+    public Rect frame = new Rect(0, 0 , 200, 200);
 
 
     //current frame is the index of the image in our animation array to use

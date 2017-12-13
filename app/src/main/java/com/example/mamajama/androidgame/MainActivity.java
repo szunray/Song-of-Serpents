@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -79,7 +81,7 @@ public class MainActivity extends Activity {
         // Tell the gameView pause method to execute
         gameView.pause();
     }
-
+//--------------------------------------------------------------------------------------------------
     class GameView extends SurfaceView implements Runnable {
 
 
@@ -108,13 +110,15 @@ public class MainActivity extends Activity {
         //TESTING Pawn
         //Trying to instance a new pawn:
         //Not sure how pawns will spawn in final game
-        List<Pawn> allPawns = new ArrayList<Pawn>();
+        List<Pawn> playerPawns = new ArrayList<Pawn>();
+        List<Pawn> directorPawns= new ArrayList<Pawn>();
         Pawn activePawn;
         Pawn Lamia;
         Pawn Handoff;
 
         //Lamia is not moving at the start
         boolean isMoving = false;
+        boolean playerTurn=true;
 
         //Creating game grid
 
@@ -139,9 +143,12 @@ public class MainActivity extends Activity {
             //instantiating Pawn
             Lamia = new Pawn(context.getApplicationContext(), "lamiawalk", 400, 400);
             activePawn = new Pawn(context.getApplicationContext(), "lamiawalk");
+            Pawn enemyPawn = new Pawn(context.getApplicationContext(),"lamiawalk",0,0);
+            enemyPawn.isAlly=false;
             Handoff = activePawn;
-            allPawns.add(activePawn);
-            allPawns.add(Lamia);
+            playerPawns.add(activePawn);
+            playerPawns.add(Lamia);
+            directorPawns.add(enemyPawn);
 
             //Instancing grid
             for (int x = 0; x < grid.length; x++) {
@@ -199,7 +206,7 @@ public class MainActivity extends Activity {
                     //First checks to see if the click was inside of any UI elements
                     //Theres only one now, and orange square.
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
-                    if (firstX<-isoCam[0]+200 && firstY<-isoCam[1]+200){
+                    if (firstX<-isoCam[0]+400 && firstY<-isoCam[1]+200){
                         break;
                         //here we'd have the click do the UI stuff. For now, it just breaks
                         //You cant click the space behind the orange block.
@@ -223,10 +230,15 @@ public class MainActivity extends Activity {
                                 isPanning = false;
                             }
 
-                            if (grid[positionInArray].type == 1) {
+                            if (grid[positionInArray].type == 2) {
                                 activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
 
                             }
+                           /* if (grid[positionInArray].type==3){
+                                Pawn temp = new Pawn(getApplicationContext().getApplicationContext(),"anacondaqwalk",cartesianClick[0],cartesianClick[1]);
+                                playerPawns.add(temp);
+
+                            }*/
 
 
                         }
@@ -270,7 +282,9 @@ public class MainActivity extends Activity {
                 grid[x].reset();
             }
 
-            for (Pawn temp : allPawns) {
+            grid[17].setType(3);
+
+            for (Pawn temp : playerPawns) {
                 int currentX = (int) temp.pawnXPosition / 200;
                 int currentY = (int) temp.pawnYPosition / 200;
                 int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
@@ -278,20 +292,37 @@ public class MainActivity extends Activity {
                 grid[positionInArray].setIsOccupied(temp);
             }
             if (activePawn.hasMoved){
-                if (playerIndex<allPawns.size()-1)
-                playerIndex+=1;
-                else
-                    playerIndex=0;
-                if(allPawns.get(playerIndex).hasMoved==false)
-                activePawn=allPawns.get(playerIndex);
+                int loopCount=0;
+                while(activePawn.hasMoved) {
+                    if (playerIndex < playerPawns.size() - 1)
+                        playerIndex += 1;
+                    else
+                        playerIndex = 0;
+                    if (playerPawns.get(playerIndex).hasMoved == false)
+                        activePawn = playerPawns.get(playerIndex);
+                    loopCount++;
+                    if (loopCount > playerPawns.size()) {
+                        playerTurn = false;
+                        break;
+                    }
+                }
+
             }
+
+            if (playerTurn==false){
+                grid[17].setIsOccupied(directorPawns.get(0));
+                autoChase(directorPawns.get(0));
+            }
+
             for (int x = 0; x < grid.length; x++) {
                 double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition - grid[x].posX), 2) + Math.pow((activePawn.pawnYPosition - grid[x].posY), 2));
                 if (Distance < activePawn.pawnMoveSpeed) {
-                    grid[x].setType(1);
+                    grid[x].setType(2);
                 }
             }
 
+            // Only the active pawn moves as you can see here.
+            // This will need to be changed later, to accomodate Idle animations.
             activePawn.move();
             if (activePawn.isMoving) {
                 activePawn.animate(time);
@@ -331,7 +362,7 @@ public class MainActivity extends Activity {
                 int positionInArray = (currentY * numberOfColumns) + currentX;
                 System.out.print("currently at block " + positionInArray);
                 try {
-                    grid[positionInArray].setType(1);
+                    grid[positionInArray].setType(2);
 
 
                 } catch (IndexOutOfBoundsException e) {
@@ -358,20 +389,31 @@ public class MainActivity extends Activity {
 
 
                 //Go through entire map. If Tile has a monster on it, draw it.
-                for (Tile tile : grid) {
+                /*for (Tile tile : grid) {
                     if (tile.isOccupied) {
                         int[] isoPawn = carToIso((int) tile.pawn.getX(), (int) tile.pawn.getY());
                         canvas.drawBitmap(tile.pawn.animation[tile.pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
                     }
 
+                }*/
+                //instead of drawing pawns based on the grid data, just go thru these lists.
+                for (Pawn pawn: playerPawns){
+                    int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
+                    canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                }
+                for (Pawn pawn: directorPawns){
+                    int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
+                    canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
                 }
 
                 //So UI is going to be objects that get drawn last.
                 //They're based on the isometric camera location, so they should remain "static"
                 //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
                 canvas.drawRect(-Cam[0],-Cam[1],400-Cam[0],200-Cam[1],paint);
+
                 int pawnIndex=0;
-                for(Pawn temp: allPawns){
+                //Bitmap bitmapIsis= BitmapFactory.decodeResource(this.getResources(),R.drawable.isis);
+                for(Pawn temp: playerPawns){
                     if (temp.hasMoved)
                     {
                         ColorMatrix cm = new ColorMatrix();
@@ -383,7 +425,8 @@ public class MainActivity extends Activity {
                     else{
                         paint.setColorFilter(null);
                     }
-                    canvas.drawBitmap(temp.portrait,-Cam[0]+pawnIndex*200,-Cam[1],paint);
+                    RectF wherePortrait=new RectF(-Cam[0]+200*pawnIndex,-Cam[1],-Cam[0]+200+200*pawnIndex,-Cam[1]+200);
+                    canvas.drawBitmap(temp.portrait,-Cam[0]+200*pawnIndex,-Cam[1],paint);
 
                     pawnIndex+=1;
                 }
@@ -396,6 +439,59 @@ public class MainActivity extends Activity {
             }
         }
 
+        public void autoChase(Pawn pawn){
+            List<Tile> viable = new ArrayList<Tile>();
+            Pawn target=null;
+            //find target
+            for (int x = 0; x < grid.length; x++) {
+                if (grid[x].isOccupied)
+                    if(grid[x].pawn.isAlly){
+                    target = grid[x].pawn;
+                    break;
+                    }
+            }
+
+            //find viable targets to move to
+            for (int x = 0; x < grid.length; x++) {
+                double Distance = Math.sqrt(Math.pow((pawn.pawnXPosition - grid[x].posX), 2) + Math.pow((pawn.pawnYPosition - grid[x].posY), 2));
+                if (Distance < pawn.pawnMoveSpeed) {
+                    viable.add(grid[x]);
+                }
+            }
+
+            //find which viable tile is closest to target
+            if (target==null){
+                return;
+            }
+            else{
+                Tile targetTile=viable.get(0);
+                double shortestDistance=Math.sqrt(Math.pow((target.pawnXPosition - viable.get(0).posX), 2) + Math.pow((target.pawnYPosition - viable.get(0).posY), 2));
+                for (int x = 0; x < viable.size(); x++) {
+                    double Distance = Math.sqrt(Math.pow((target.pawnXPosition - viable.get(x).posX), 2) + Math.pow((target.pawnYPosition - viable.get(x).posY), 2));
+                    if (Distance<shortestDistance){
+                        targetTile=viable.get(x);
+                        shortestDistance=Distance;
+                    }
+                }
+
+                //move to tile
+                pawn.setDestination(targetTile.posX,targetTile.posY);
+                pawn.move();
+                while(pawn.isMoving){
+                    pawn.move();
+                }
+                playerTurn=true;
+                resetTurn();
+            }
+
+
+        }
+
+        public void resetTurn(){
+            for (Pawn temp:playerPawns){
+                temp.hasMoved=false;
+            }
+        }
         // shutdown our thread.
         public void pause() {
             playing = false;

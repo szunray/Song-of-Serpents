@@ -170,11 +170,14 @@ public class MainActivity extends Activity {
                 long startFrameTime = System.currentTimeMillis();
 
                 // Delete pass
-                for (Pawn pawn: directorPawns){
-                    if(pawn.hp==0)
-                        directorPawns.remove(pawn);
+                int i=directorPawns.size();
+                for (int x=0;x<i;x++){
+                    if (directorPawns.get(x).hp==0){
+                        directorPawns.remove(directorPawns.get(x));
+                        x--;
+                        i--;
+                    }
                 }
-
                 //Then update
                 update(startFrameTime);
 

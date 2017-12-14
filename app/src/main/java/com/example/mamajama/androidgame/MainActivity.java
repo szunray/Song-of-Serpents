@@ -120,6 +120,8 @@ public class MainActivity extends Activity {
         boolean isMoving = false;
         boolean playerTurn=true;
 
+        boolean cLocked=false;
+
         //Creating game grid
 
 
@@ -167,11 +169,18 @@ public class MainActivity extends Activity {
                 //capture the current time in milliseconds
                 long startFrameTime = System.currentTimeMillis();
 
+                // Delete pass
+                for (Pawn pawn: directorPawns){
+                    if(pawn.hp==0)
+                        directorPawns.remove(pawn);
+                }
+
                 //Then update
                 update(startFrameTime);
 
                 //Then draw
-                draw();
+                    draw();
+
 
                 //Lastly calculate fps
                 long timeThisFrame = System.currentTimeMillis() - startFrameTime;
@@ -222,23 +231,33 @@ public class MainActivity extends Activity {
                     int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
                     int numberOfRows = SCREEN_HEIGHT / TILE_HEIGHT;
 
+                    //why does this work?
+                    //Answer: Because all enemy pawns have moved.
+                    //So control bounces off of them the moment you touch them.
+                    // Should definitely fix this.
                     if(activePawn.isMoving==false) {
                         int positionInArray = (fingerColumn * numberOfColumns) + fingerRow;
                         if (positionInArray >= 0 && positionInArray < grid.length) {
                             if (grid[positionInArray].isOccupied) {
-                                activePawn = grid[positionInArray].pawn;
-                                isPanning = false;
+
+                                if(grid[positionInArray].type==4){
+                                    //Never gets called.
+                                    //because it's type 4 dummy
+                                    grid[positionInArray].pawn.kill();
+                                    grid[positionInArray].Vacate();
+                                    activePawn.hasMoved=true;
+                                }
+                                else {
+                                    activePawn = grid[positionInArray].pawn;
+                                    isPanning = false;
+                                }
+
                             }
 
                             if (grid[positionInArray].type == 2) {
                                 activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
 
                             }
-                           /* if (grid[positionInArray].type==3){
-                                Pawn temp = new Pawn(getApplicationContext().getApplicationContext(),"anacondaqwalk",cartesianClick[0],cartesianClick[1]);
-                                playerPawns.add(temp);
-
-                            }*/
 
 
                         }
@@ -284,6 +303,7 @@ public class MainActivity extends Activity {
 
             grid[17].setType(3);
 
+            // ensure the paws are occupying tiles
             for (Pawn temp : playerPawns) {
                 int currentX = (int) temp.pawnXPosition / 200;
                 int currentY = (int) temp.pawnYPosition / 200;
@@ -291,6 +311,21 @@ public class MainActivity extends Activity {
                 int positionInArray = (currentY * numberOfColumns) + currentX;
                 grid[positionInArray].setIsOccupied(temp);
             }
+            for (Pawn temp : directorPawns) {
+                int currentX = (int) temp.pawnXPosition / 200;
+                int currentY = (int) temp.pawnYPosition / 200;
+                int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
+                int positionInArray = (currentY * numberOfColumns) + currentX;
+
+                if(temp.hp>0)
+                grid[positionInArray].setIsOccupied(temp);
+                else
+                    grid[positionInArray].Vacate();
+            }
+
+
+            //Keep track of who moved
+            //TODO: Make player unable to move moved pieces.
             if (activePawn.hasMoved){
                 int loopCount=0;
                 while(activePawn.hasMoved) {
@@ -309,20 +344,33 @@ public class MainActivity extends Activity {
 
             }
 
+            //After player pieces have moved, their turn is over
+            //Spawn enemy pawn, have all enemy pawns chase.
             if (playerTurn==false){
-                //grid[17].setIsOccupied(directorPawns.get(0));
-                //autoChase(directorPawns.get(0));
                 Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
                 enemyPawn.isAlly=false;
                 directorPawns.add(enemyPawn);
-                autoChase(directorPawns.get(0));
+
+                for(Pawn enemy:directorPawns) {
+                    if(enemy.hp>0){
+                        autoChase(enemy);
+                    }
+                }
+
             }
 
             for (int x = 0; x < grid.length; x++) {
                 double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition - grid[x].posX), 2) + Math.pow((activePawn.pawnYPosition - grid[x].posY), 2));
                 if (Distance < activePawn.pawnMoveSpeed) {
                     grid[x].setType(2);
+                    if (grid[x].isOccupied){
+                        grid[x].setType(1);
+                        if(grid[x].pawn.isAlly==false){
+                            grid[x].setType(4);
+                        }
+                    }
                 }
+
             }
 
             // Only the active pawn moves as you can see here.
@@ -335,6 +383,7 @@ public class MainActivity extends Activity {
                 pawn.move();
                 if (pawn.isMoving){
                     pawn.animate(time);
+                    break;
                 }
             }
 
@@ -345,10 +394,13 @@ public class MainActivity extends Activity {
         public void draw() {
 
             //Ensure the drawing surface exists
+
             if (ourHolder.getSurface().isValid()) {
                 // Lock the canvas ready to draw
                 // Make the drawing surface our canvas object
+                //if(!cLocked)
                 canvas = ourHolder.lockCanvas();
+
 
 
                 // Draw the background color
@@ -385,35 +437,32 @@ public class MainActivity extends Activity {
                 int[] Cam = carToIso(CAMERA_X, CAMERA_Y);
                 canvas.translate(Cam[0], Cam[1]);
 
+                //Draw the grid isometrically
                 for (int x = 0; x < grid.length; x++) {
                     float xpos = ((x % w) * TILE_WIDTH);
                     float ypos = (x / w) * TILE_HEIGHT;
                     int[] isoTile = carToIso(grid[x].posX + X_OFFSET, grid[x].posY);
                     canvas.drawBitmap(grid[x].bitmap, isoTile[0], isoTile[1], paint);
                     canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
-                    //canvas.drawBitmap(grid[x].bitmap,grid[x].posX,grid[x].posY,paint);
+
                 }
 
                 // Display the current fps on the screen
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
 
 
-                //Go through entire map. If Tile has a monster on it, draw it.
-                /*for (Tile tile : grid) {
-                    if (tile.isOccupied) {
-                        int[] isoPawn = carToIso((int) tile.pawn.getX(), (int) tile.pawn.getY());
-                        canvas.drawBitmap(tile.pawn.animation[tile.pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
-                    }
-
-                }*/
                 //instead of drawing pawns based on the grid data, just go thru these lists.
                 for (Pawn pawn: playerPawns){
                     int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
                     canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
                 }
+
+
                 for (Pawn pawn: directorPawns){
-                    int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
-                    canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                    if(pawn.hp>0) {
+                        int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
+                        canvas.drawBitmap(pawn.animation[pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
+                    }
                 }
 
                 //So UI is going to be objects that get drawn last.
@@ -445,8 +494,11 @@ public class MainActivity extends Activity {
                 //canvas.drawBitmap(activePawn.portrait,-Cam[0],-Cam[1],paint);
                 //protoUI
 
+                //if (cLocked)
                 ourHolder.unlockCanvasAndPost(canvas);
             }
+
+
         }
 
         public void autoChase(Pawn pawn){
@@ -464,7 +516,7 @@ public class MainActivity extends Activity {
             //find viable targets to move to
             for (int x = 0; x < grid.length; x++) {
                 double Distance = Math.sqrt(Math.pow((pawn.pawnXPosition - grid[x].posX), 2) + Math.pow((pawn.pawnYPosition - grid[x].posY), 2));
-                if (Distance < pawn.pawnMoveSpeed) {
+                if (Distance < pawn.pawnMoveSpeed&&grid[x].isOccupied==false) {
                     viable.add(grid[x]);
                 }
             }

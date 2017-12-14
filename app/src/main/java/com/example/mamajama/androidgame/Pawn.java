@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Created by MamaJama on 12/1/2017.
@@ -28,6 +29,8 @@ public class Pawn {
     float pawnYPosition=200;
 
     float destination[] = {200,200};
+
+    int hp=100;
 
     boolean isAlly=true;
     boolean isMoving=false;
@@ -54,8 +57,10 @@ public class Pawn {
     public void setDestination(float Xposition, float Yposition){
         destination[0]=Xposition;
         destination[1]=Yposition;
+
     }
     public void move(){
+
         if (destination[0]==pawnXPosition&&destination[1]==pawnYPosition&&isMoving==false){
             isMoving=false;
             return;
@@ -132,6 +137,11 @@ public class Pawn {
         frameTimer=10;
         fps=10;
 
+    }
+
+    public void kill(){
+        Log.d("KILL", "Pawn is dead, long live the pawn!");
+        hp=0;
     }
 
 }

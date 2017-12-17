@@ -230,12 +230,10 @@ public class MainActivity extends Activity {
                     //First checks to see if the click was inside of any UI elements
                     //Theres only one now, and orange square.
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
-
-                    // THIS DOESNT WORK
+                    
                     // Also: the grid extends beyond visible boundaries.
-                    if (firstX<(-isoCam[0]+400) && firstY<(-isoCam[1]+200)){
+                    if (firstX<(-CAMERA_Y+400) && firstY<(-CAMERA_Y+200)){
                         Log.d("Inside", "Click intercepted");
-                        // Why doesnt the camera snap when this is intercepted.
                         nextPawn();
                         break;
 
@@ -251,10 +249,7 @@ public class MainActivity extends Activity {
                     int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
                     int numberOfRows = SCREEN_HEIGHT / TILE_HEIGHT;
 
-                    //why does this work?
-                    //Answer: Because all enemy pawns have moved.
-                    //So control bounces off of them the moment you touch them.
-                    // Should definitely fix this.
+
                     if(activePawn.isMoving==false) {
                         int positionInArray = (fingerColumn * numberOfColumns) + fingerRow;
                         if (positionInArray >= 0 && positionInArray < grid.length) {

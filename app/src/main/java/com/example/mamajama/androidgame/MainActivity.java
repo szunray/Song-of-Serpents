@@ -9,13 +9,14 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.Rect;
+
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +29,21 @@ public class MainActivity extends Activity {
     public static int TILE_HEIGHT = 200;
     public static int SCREEN_WIDTH = 1200;
     public static int SCREEN_HEIGHT = 1600;
-    public static int X_OFFSET = 0;
+
     //Camera offsets are set right before the Pawn is Drawn
     public static int CAMERA_X = 0;
     public static int CAMERA_Y = 0;
-    public boolean isPanning = false;
-    GameView gameView;
-    private float firstX, firstY;
 
-    int playerIndex=0;// Should make player a class in the future
+    //These are Camera Panning variables
+    //need to stay global
+    public boolean isPanning = false;
+    float firstX =0, firstY =0;
+
+
+    GameView gameView;
+    GameUI basicUI;
+
+    // Should make player a class in the future
     //Cartesian to isometric:
     public int[] carToIso(int cartX, int cartY) {
         int isoX = cartX - cartY;
@@ -114,7 +121,7 @@ public class MainActivity extends Activity {
         List<Pawn> directorPawns= new ArrayList<Pawn>();
         Pawn activePawn;
         Pawn Lamia;
-        Pawn Handoff;
+
 
         //Lamia is not moving at the start
         boolean isMoving = false;
@@ -143,11 +150,12 @@ public class MainActivity extends Activity {
             paint = new Paint();
 
             //instantiating Pawn
+            //Bug: If enemy pawn doesnt move, you can select it!
             Lamia = new Pawn(context.getApplicationContext(), "lamiawalk", 400, 400);
             activePawn = new Pawn(context.getApplicationContext(), "lamiawalk");
             Pawn enemyPawn = new Pawn(context.getApplicationContext(),"lamiawalk",0,0);
             enemyPawn.isAlly=false;
-            Handoff = activePawn;
+
             playerPawns.add(activePawn);
             playerPawns.add(Lamia);
 
@@ -158,6 +166,9 @@ public class MainActivity extends Activity {
                 int ypos = (x / w) * TILE_HEIGHT;
                 grid[x] = new Tile(context.getApplicationContext(), xpos, ypos);
             }
+
+
+
 
         }
 
@@ -200,6 +211,7 @@ public class MainActivity extends Activity {
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent) {
 
+
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
 
 
@@ -218,16 +230,20 @@ public class MainActivity extends Activity {
                     //First checks to see if the click was inside of any UI elements
                     //Theres only one now, and orange square.
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
-                    if (firstX<-isoCam[0]+400 && firstY<-isoCam[1]+200){
+
+                    // THIS DOESNT WORK
+                    // Also: the grid extends beyond visible boundaries.
+                    if (firstX<(-isoCam[0]+400) && firstY<(-isoCam[1]+200)){
+                        Log.d("Inside", "Click intercepted");
+                        nextPawn();
                         break;
-                        //here we'd have the click do the UI stuff. For now, it just breaks
-                        //You cant click the space behind the orange block.
+                        
                     }
                     int[] cartesianClick = isoToCar((int) motionEvent.getX() - isoCam[0], (int) (motionEvent.getY() - isoCam[1]));
 
-
                     cartesianClick[0] = Math.round((cartesianClick[0]) / TILE_WIDTH) * TILE_WIDTH;
                     cartesianClick[1] = Math.round((cartesianClick[1]) / TILE_HEIGHT) * TILE_HEIGHT;
+
 
                     int fingerRow = cartesianClick[0] / TILE_WIDTH;
                     int fingerColumn = cartesianClick[1] / TILE_HEIGHT;
@@ -244,13 +260,11 @@ public class MainActivity extends Activity {
                             if (grid[positionInArray].isOccupied) {
 
                                 if(grid[positionInArray].type==4){
-                                    //Never gets called.
-                                    //because it's type 4 dummy
                                     grid[positionInArray].pawn.kill();
                                     grid[positionInArray].Vacate();
                                     activePawn.hasMoved=true;
                                 }
-                                else {
+                                else if (grid[positionInArray].pawn.isAlly&&grid[positionInArray].pawn.hasMoved==false){
                                     activePawn = grid[positionInArray].pawn;
                                     isPanning = false;
                                 }
@@ -330,27 +344,14 @@ public class MainActivity extends Activity {
             //Keep track of who moved
             //TODO: Make player unable to move moved pieces.
             if (activePawn.hasMoved){
-                int loopCount=0;
-                while(activePawn.hasMoved) {
-                    if (playerIndex < playerPawns.size() - 1)
-                        playerIndex += 1;
-                    else
-                        playerIndex = 0;
-                    if (playerPawns.get(playerIndex).hasMoved == false)
-                        activePawn = playerPawns.get(playerIndex);
-                    loopCount++;
-                    if (loopCount > playerPawns.size()) {
-                        playerTurn = false;
-                        break;
-                    }
-                }
-
+                nextPawn();
             }
 
             //After player pieces have moved, their turn is over
             //Spawn enemy pawn, have all enemy pawns chase.
             if (playerTurn==false){
                 Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
+
                 enemyPawn.isAlly=false;
                 directorPawns.add(enemyPawn);
 
@@ -390,6 +391,29 @@ public class MainActivity extends Activity {
                 }
             }
 
+
+        }
+
+        public void nextPawn(){
+
+            int playerIndex=0;
+            int loopCount=0;
+
+            while(activePawn.hasMoved) {
+                if (playerIndex < playerPawns.size() - 1)
+                    playerIndex += 1;
+                else
+                    playerIndex = 0;
+
+                if (playerPawns.get(playerIndex).hasMoved == false)
+                    activePawn = playerPawns.get(playerIndex);
+
+                loopCount++;
+                if (loopCount > playerPawns.size()) {
+                    playerTurn = false;
+                    break;
+                }
+            }
 
         }
 //--------------------------------------------------------------------------------------------------
@@ -444,7 +468,7 @@ public class MainActivity extends Activity {
                 for (int x = 0; x < grid.length; x++) {
                     float xpos = ((x % w) * TILE_WIDTH);
                     float ypos = (x / w) * TILE_HEIGHT;
-                    int[] isoTile = carToIso(grid[x].posX + X_OFFSET, grid[x].posY);
+                    int[] isoTile = carToIso(grid[x].posX, grid[x].posY);
                     canvas.drawBitmap(grid[x].bitmap, isoTile[0], isoTile[1], paint);
                     canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
 
@@ -471,7 +495,11 @@ public class MainActivity extends Activity {
                 //So UI is going to be objects that get drawn last.
                 //They're based on the isometric camera location, so they should remain "static"
                 //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
-                canvas.drawRect(-Cam[0],-Cam[1],400-Cam[0],200-Cam[1],paint);
+                //canvas.drawRect(-Cam[0],-Cam[1],400-Cam[0],200-Cam[1],paint);
+
+                basicUI=new GameUI(Cam[0],Cam[1]);
+                basicUI.draw(canvas,paint);
+
 
                 int pawnIndex=0;
                 //Bitmap bitmapIsis= BitmapFactory.decodeResource(this.getResources(),R.drawable.isis);
@@ -488,7 +516,8 @@ public class MainActivity extends Activity {
                         paint.setColorFilter(null);
                     }
                     RectF wherePortrait=new RectF(-Cam[0]+200*pawnIndex,-Cam[1],-Cam[0]+200+200*pawnIndex,-Cam[1]+200);
-                    canvas.drawBitmap(temp.portrait,-Cam[0]+200*pawnIndex,-Cam[1],paint);
+                    //canvas.drawBitmap(temp.portrait,-Cam[0]+200*pawnIndex,-Cam[1],paint);
+                    canvas.drawBitmap(temp.Idle,temp.frames[temp.currentFrame],wherePortrait,paint);
 
                     pawnIndex+=1;
                 }

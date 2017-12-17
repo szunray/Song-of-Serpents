@@ -235,9 +235,10 @@ public class MainActivity extends Activity {
                     // Also: the grid extends beyond visible boundaries.
                     if (firstX<(-isoCam[0]+400) && firstY<(-isoCam[1]+200)){
                         Log.d("Inside", "Click intercepted");
+                        // Why doesnt the camera snap when this is intercepted.
                         nextPawn();
                         break;
-                        
+
                     }
                     int[] cartesianClick = isoToCar((int) motionEvent.getX() - isoCam[0], (int) (motionEvent.getY() - isoCam[1]));
 
@@ -395,24 +396,20 @@ public class MainActivity extends Activity {
         }
 
         public void nextPawn(){
-
-            int playerIndex=0;
             int loopCount=0;
-
-            while(activePawn.hasMoved) {
+            while(loopCount<playerPawns.size()) {
+                int playerIndex = playerPawns.indexOf(activePawn);
                 if (playerIndex < playerPawns.size() - 1)
                     playerIndex += 1;
                 else
                     playerIndex = 0;
-
-                if (playerPawns.get(playerIndex).hasMoved == false)
+                if(playerPawns.get(playerIndex).hasMoved==false) {
                     activePawn = playerPawns.get(playerIndex);
-
-                loopCount++;
-                if (loopCount > playerPawns.size()) {
-                    playerTurn = false;
                     break;
                 }
+                loopCount++;
+                if (loopCount>=playerPawns.size())
+                    playerTurn=false;
             }
 
         }

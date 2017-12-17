@@ -230,7 +230,7 @@ public class MainActivity extends Activity {
                     //First checks to see if the click was inside of any UI elements
                     //Theres only one now, and orange square.
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
-                    
+
                     // Also: the grid extends beyond visible boundaries.
                     if (firstX<(-CAMERA_Y+400) && firstY<(-CAMERA_Y+200)){
                         Log.d("Inside", "Click intercepted");

@@ -12,7 +12,7 @@ import android.util.Log;
 public class GameUI {
     public float left, top, right, bottom;
     public RectF section;
-
+// GameUI needs to update regularly to stay in top left corner.
     public GameUI(float cameraX, float cameraY){
         left = -cameraX;
         top= -cameraY;

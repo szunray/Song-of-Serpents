@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
 
 
     GameView gameView;
-    GameUI basicUI;
+    GameUI basicUI = new GameUI(CAMERA_X,CAMERA_Y);
 
     // Should make player a class in the future
     //Cartesian to isometric:
@@ -294,6 +294,7 @@ public class MainActivity extends Activity {
                     CAMERA_X += distance[0];
                     CAMERA_Y += distance[1];
 
+
                     invalidate();
 
                     // Remember this touch position for the next move event
@@ -338,7 +339,6 @@ public class MainActivity extends Activity {
 
 
             //Keep track of who moved
-            //TODO: Make player unable to move moved pieces.
             if (activePawn.hasMoved){
                 nextPawn();
             }
@@ -351,6 +351,7 @@ public class MainActivity extends Activity {
                 enemyPawn.isAlly=false;
                 directorPawns.add(enemyPawn);
 
+                //TODO: Stop enemies from stacking on one another
                 for(Pawn enemy:directorPawns) {
                     if(enemy.hp>0){
                         autoChase(enemy);
@@ -386,6 +387,10 @@ public class MainActivity extends Activity {
                     break;
                 }
             }
+
+
+
+
 
 
         }
@@ -455,6 +460,9 @@ public class MainActivity extends Activity {
                 }
                 int[] Cam = carToIso(CAMERA_X, CAMERA_Y);
                 canvas.translate(Cam[0], Cam[1]);
+                // basicUI needs to be updated as the canvas translates.
+                //To remain firmly in place.
+                basicUI.update(CAMERA_X,CAMERA_Y);
 
                 //Draw the grid isometrically
                 for (int x = 0; x < grid.length; x++) {
@@ -487,10 +495,8 @@ public class MainActivity extends Activity {
                 //So UI is going to be objects that get drawn last.
                 //They're based on the isometric camera location, so they should remain "static"
                 //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
-                //canvas.drawRect(-Cam[0],-Cam[1],400-Cam[0],200-Cam[1],paint);
-
-                basicUI=new GameUI(Cam[0],Cam[1]);
                 basicUI.draw(canvas,paint);
+
 
 
                 int pawnIndex=0;

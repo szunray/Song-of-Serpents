@@ -44,11 +44,19 @@ public class GameUI {
     }
 
     public boolean isInsideOf(float x, float y){
-        if (x > right){
-
-                Log.d("Inside","Returning True");
+        int isoClick[]=carToIso((int)x,(int)y);
+        x=isoClick[0];
+        y=isoClick[1];
+        if (x > left && x < right){
+            Log.d("Inside", "Left is "+ left+ "Right is "+right+ " and x was "+x);
+            if (y>top && y<bottom) {
+                Log.d("Inside", "top is "+ top+ "bottom is "+bottom+ " and y was "+y);
+                Log.d("Inside", "Returning True");
                 return true;
+            }
         }
+        Log.d("Inside", "Left is "+ left+ "Right is "+right+ " and x was "+x);
+        Log.d("Inside", "top is "+ top+ "bottom is "+bottom+ " and y was "+y);
         Log.d("Inside","Returning false");
         return false;
     }

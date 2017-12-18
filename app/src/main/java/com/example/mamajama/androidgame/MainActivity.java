@@ -43,6 +43,8 @@ public class MainActivity extends Activity {
     GameView gameView;
     GameUI basicUI = new GameUI(CAMERA_X,CAMERA_Y);
 
+    public boolean someoneIsMoving=false;
+
     // Should make player a class in the future
     //Cartesian to isometric:
     public int[] carToIso(int cartX, int cartY) {
@@ -189,6 +191,15 @@ public class MainActivity extends Activity {
                         i--;
                     }
                 }
+                i=playerPawns.size();
+                for (int x=0;x<i;x++){
+                    if (playerPawns.get(x).hp==0){
+                        playerPawns.remove(playerPawns.get(x));
+                        x--;
+                        i--;
+                        nextPawn();
+                    }
+                }
                 //Then update
                 update(startFrameTime);
 
@@ -232,17 +243,30 @@ public class MainActivity extends Activity {
                     int[] isoCam = carToIso(CAMERA_X, CAMERA_Y);
 
                     // Also: the grid extends beyond visible boundaries.
-                    if (firstX<(-CAMERA_Y+400) && firstY<(-CAMERA_Y+200)){
-                        Log.d("Inside", "Click intercepted");
-                        nextPawn();
-                        break;
 
-                    }
                     int[] cartesianClick = isoToCar((int) motionEvent.getX() - isoCam[0], (int) (motionEvent.getY() - isoCam[1]));
+
+                    //first check if the click is inside a UI element.
+                    if (basicUI.isInsideOf(cartesianClick[0],cartesianClick[1])){
+                        nextPawn();
+                    }
+
+                    //then check to see if it is inside of the grid.
 
                     cartesianClick[0] = Math.round((cartesianClick[0]) / TILE_WIDTH) * TILE_WIDTH;
                     cartesianClick[1] = Math.round((cartesianClick[1]) / TILE_HEIGHT) * TILE_HEIGHT;
 
+                    if(cartesianClick[0]>SCREEN_WIDTH ||cartesianClick[0]<0)
+                        break;
+                    if(cartesianClick[1]>SCREEN_HEIGHT ||cartesianClick[1]<0)
+                        break;
+
+
+
+                    //Then check to see if it's on a grid element
+                    if (cartesianClick[0]>0 && cartesianClick[0]<SCREEN_WIDTH){
+
+                    }
 
                     int fingerRow = cartesianClick[0] / TILE_WIDTH;
                     int fingerColumn = cartesianClick[1] / TILE_HEIGHT;
@@ -250,10 +274,10 @@ public class MainActivity extends Activity {
                     int numberOfRows = SCREEN_HEIGHT / TILE_HEIGHT;
 
 
-                    if(activePawn.isMoving==false) {
+                    if(activePawn.isMoving==false&&!someoneIsMoving) {
                         int positionInArray = (fingerColumn * numberOfColumns) + fingerRow;
                         if (positionInArray >= 0 && positionInArray < grid.length) {
-                            if (grid[positionInArray].isOccupied) {
+                            if (grid[positionInArray].isOccupied) {// all this validation may not be necessary.
 
                                 if(grid[positionInArray].type==4){
                                     grid[positionInArray].pawn.kill();
@@ -268,6 +292,7 @@ public class MainActivity extends Activity {
                             }
 
                             if (grid[positionInArray].type == 2) {
+                                //Log.d("Destination","Position in area is "+positionInArray);
                                 activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
 
                             }
@@ -323,7 +348,12 @@ public class MainActivity extends Activity {
                 int currentY = (int) temp.pawnYPosition / 200;
                 int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
                 int positionInArray = (currentY * numberOfColumns) + currentX;
-                grid[positionInArray].setIsOccupied(temp);
+
+                if(temp.hp>0)
+                    grid[positionInArray].setIsOccupied(temp);
+                else
+                    grid[positionInArray].Vacate();
+                //grid[positionInArray].setIsOccupied(temp);
             }
             for (Pawn temp : directorPawns) {
                 int currentX = (int) temp.pawnXPosition / 200;
@@ -347,16 +377,15 @@ public class MainActivity extends Activity {
             //Spawn enemy pawn, have all enemy pawns chase.
             if (playerTurn==false){
                 Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
-
                 enemyPawn.isAlly=false;
                 directorPawns.add(enemyPawn);
+                for(Pawn pawn:directorPawns){
+                    autoChase(pawn);
+                }
+                resetTurn();
+                playerTurn=true;
 
                 //TODO: Stop enemies from stacking on one another
-                for(Pawn enemy:directorPawns) {
-                    if(enemy.hp>0){
-                        autoChase(enemy);
-                    }
-                }
 
             }
 
@@ -376,16 +405,20 @@ public class MainActivity extends Activity {
 
             // Only the active pawn moves as you can see here.
             // This will need to be changed later, to accomodate Idle animations.
+            someoneIsMoving=false;
             activePawn.move();
             if (activePawn.isMoving) {
+                someoneIsMoving=true;
                 activePawn.animate(time);
             }
             for (Pawn pawn:directorPawns){
                 pawn.move();
                 if (pawn.isMoving){
+                    someoneIsMoving=true;
                     pawn.animate(time);
                     break;
                 }
+
             }
 
 
@@ -397,20 +430,32 @@ public class MainActivity extends Activity {
 
         public void nextPawn(){
             int loopCount=0;
+            int playerIndex = playerPawns.indexOf(activePawn);
+
             while(loopCount<playerPawns.size()) {
-                int playerIndex = playerPawns.indexOf(activePawn);
-                if (playerIndex < playerPawns.size() - 1)
-                    playerIndex += 1;
-                else
+
+
+                if (playerIndex < playerPawns.size() - 1) {
+                    playerIndex++;
+                }
+                else {
                     playerIndex = 0;
+                }
+
                 if(playerPawns.get(playerIndex).hasMoved==false) {
                     activePawn = playerPawns.get(playerIndex);
-                    break;
+                    return;
                 }
+                else
                 loopCount++;
-                if (loopCount>=playerPawns.size())
-                    playerTurn=false;
+
+                if (loopCount>=playerPawns.size()) {
+                    Log.d("PawnList", "size of player pawns is "+playerPawns.size());
+                }
             }
+
+            playerTurn = false;
+            resetEnemy();
 
         }
 //--------------------------------------------------------------------------------------------------
@@ -534,11 +579,13 @@ public class MainActivity extends Activity {
         public void autoChase(Pawn pawn){
             List<Tile> viable = new ArrayList<Tile>();
             Pawn target=null;
+            Tile testVacate=null;
             //find target
             for (int x = 0; x < grid.length; x++) {
                 if (grid[x].isOccupied)
                     if(grid[x].pawn.isAlly){
                     target = grid[x].pawn;
+                    testVacate=grid[x];
                     break;
                     }
             }
@@ -549,6 +596,15 @@ public class MainActivity extends Activity {
                 if (Distance < pawn.pawnMoveSpeed&&grid[x].isOccupied==false) {
                     viable.add(grid[x]);
                 }
+            }
+
+            //
+            double inrange=Math.sqrt(Math.pow((target.pawnXPosition - pawn.pawnXPosition), 2) + Math.pow((target.pawnYPosition - pawn.pawnYPosition), 2));
+            if (inrange<pawn.pawnMoveSpeed){
+                target.kill();
+                Log.d("Kill confirmed","Pawn has killed a player piece");
+                testVacate.Vacate();
+                return;
             }
 
             //find which viable tile is closest to target
@@ -569,8 +625,8 @@ public class MainActivity extends Activity {
                 //move to tile
                 pawn.setDestination(targetTile.posX,targetTile.posY);
                 pawn.move();
-                playerTurn=true;
-                resetTurn();
+                //playerTurn=true;
+                //resetTurn();
             }
 
 
@@ -578,6 +634,12 @@ public class MainActivity extends Activity {
 
         public void resetTurn(){
             for (Pawn temp:playerPawns){
+                temp.hasMoved=false;
+            }
+
+        }
+        public void resetEnemy(){
+            for (Pawn temp: directorPawns){
                 temp.hasMoved=false;
             }
         }

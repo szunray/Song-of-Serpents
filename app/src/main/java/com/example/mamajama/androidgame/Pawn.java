@@ -122,6 +122,7 @@ public class Pawn {
         currentFrame=0;
         frameTimer=10;
         fps=10;
+        hasMoved=false;
 
     }
 
@@ -161,14 +162,14 @@ public class Pawn {
                          w = Float.parseFloat(myparser.getAttributeValue(null,"w"));
                          h = Float.parseFloat(myparser.getAttributeValue(null,"h"));
                          int scaleW=(int)Math.ceil(200/w);
-                         Log.d("ScaleW", "ScaleW is "+scaleW);
+                         //Log.d("ScaleW", "ScaleW is "+scaleW);
                          int scaleH=(int)Math.ceil(200/h);
-                         Log.d("ScaleW", "ScaleH is "+scaleH);
+                         //Log.d("ScaleW", "ScaleH is "+scaleH);
 
                          frames[iterator]=new Rect((int)x*scaleW,(int)y*scaleH,(int)x*scaleW+(int)(w*scaleW),(int)y*scaleH+(int)(h*scaleH));
                          iterator ++;
 
-                        Log.d("XMLREAD","Event is"+x +" Iterator is" + iterator);
+                        //Log.d("XMLREAD","Event is"+x +" Iterator is" + iterator);
 
                      }
                      break;
@@ -190,6 +191,7 @@ public class Pawn {
     }
     public void move(){
 
+        ;
         if (destination[0]==pawnXPosition&&destination[1]==pawnYPosition&&isMoving==false){
             isMoving=false;
             return;

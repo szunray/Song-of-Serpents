@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
     //need to stay global
     public boolean isPanning = false;
     float firstX =0, firstY =0;
+    public int numMoved=0;
 
 
     GameView gameView;
@@ -129,7 +130,7 @@ public class MainActivity extends Activity {
         boolean isMoving = false;
         boolean playerTurn=true;
 
-        boolean cLocked=false;
+
 
         //Creating game grid
 
@@ -339,6 +340,9 @@ public class MainActivity extends Activity {
             for (int x = 0; x < grid.length; x++) {
                 grid[x].reset();
             }
+            if (playerPawns.size()==0){
+                return;
+            }
 
             grid[17].setType(3);
 
@@ -379,13 +383,17 @@ public class MainActivity extends Activity {
                 Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
                 enemyPawn.isAlly=false;
                 directorPawns.add(enemyPawn);
-                for(Pawn pawn:directorPawns){
-                    autoChase(pawn);
-                }
-                resetTurn();
-                playerTurn=true;
 
-                //TODO: Stop enemies from stacking on one another
+                    for (Pawn pawn : directorPawns) {
+                            autoChase(pawn);
+                    }
+
+                        resetTurn();
+                        playerTurn = true;
+
+
+
+                
 
             }
 
@@ -462,12 +470,14 @@ public class MainActivity extends Activity {
 
         public void draw() {
 
+
+
             //Ensure the drawing surface exists
 
             if (ourHolder.getSurface().isValid()) {
                 // Lock the canvas ready to draw
                 // Make the drawing surface our canvas object
-                //if(!cLocked)
+
                 canvas = ourHolder.lockCanvas();
 
 
@@ -478,6 +488,11 @@ public class MainActivity extends Activity {
                 // Choose the brush color for drawing
                 paint.setColor(Color.argb(255, 249, 129, 0));
 
+                while (playerPawns.size()==0){
+                    canvas.drawText("You Lose", 20, 40, paint);
+                    ourHolder.unlockCanvasAndPost(canvas);
+                    return;
+                }
                 //would be nice to find a new background image
                 Bitmap Backdrop = BitmapFactory.decodeResource(this.getResources(), R.drawable.cloud);
                 canvas.drawBitmap(Backdrop, 0, 0, paint);
@@ -511,8 +526,6 @@ public class MainActivity extends Activity {
 
                 //Draw the grid isometrically
                 for (int x = 0; x < grid.length; x++) {
-                    float xpos = ((x % w) * TILE_WIDTH);
-                    float ypos = (x / w) * TILE_HEIGHT;
                     int[] isoTile = carToIso(grid[x].posX, grid[x].posY);
                     canvas.drawBitmap(grid[x].bitmap, isoTile[0], isoTile[1], paint);
                     canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
@@ -545,7 +558,7 @@ public class MainActivity extends Activity {
 
 
                 int pawnIndex=0;
-                //Bitmap bitmapIsis= BitmapFactory.decodeResource(this.getResources(),R.drawable.isis);
+
                 for(Pawn temp: playerPawns){
                     if (temp.hasMoved)
                     {
@@ -559,17 +572,15 @@ public class MainActivity extends Activity {
                         paint.setColorFilter(null);
                     }
                     RectF wherePortrait=new RectF(-Cam[0]+200*pawnIndex,-Cam[1],-Cam[0]+200+200*pawnIndex,-Cam[1]+200);
-                    //canvas.drawBitmap(temp.portrait,-Cam[0]+200*pawnIndex,-Cam[1],paint);
+
                     canvas.drawBitmap(temp.Idle,temp.frames[temp.currentFrame],wherePortrait,paint);
 
                     pawnIndex+=1;
                 }
-                pawnIndex=0;
-                paint.setColorFilter(null);
-                //canvas.drawBitmap(activePawn.portrait,-Cam[0],-Cam[1],paint);
-                //protoUI
 
-                //if (cLocked)
+                paint.setColorFilter(null);
+
+
                 ourHolder.unlockCanvasAndPost(canvas);
             }
 
@@ -589,6 +600,9 @@ public class MainActivity extends Activity {
                     break;
                     }
             }
+            if (target==null){
+                return;
+            }
 
             //find viable targets to move to
             for (int x = 0; x < grid.length; x++) {
@@ -604,6 +618,7 @@ public class MainActivity extends Activity {
                 target.kill();
                 Log.d("Kill confirmed","Pawn has killed a player piece");
                 testVacate.Vacate();
+                pawn.hasMoved=true;
                 return;
             }
 
@@ -624,6 +639,7 @@ public class MainActivity extends Activity {
 
                 //move to tile
                 pawn.setDestination(targetTile.posX,targetTile.posY);
+                targetTile.setIsOccupied(pawn);
                 pawn.move();
                 //playerTurn=true;
                 //resetTurn();

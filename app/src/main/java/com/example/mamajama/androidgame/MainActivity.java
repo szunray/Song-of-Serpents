@@ -344,7 +344,7 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            grid[17].setType(3);
+
 
             // ensure the paws are occupying tiles
             for (Pawn temp : playerPawns) {
@@ -393,7 +393,7 @@ public class MainActivity extends Activity {
 
 
 
-                
+
 
             }
 
@@ -421,7 +421,7 @@ public class MainActivity extends Activity {
             }
             for (Pawn pawn:directorPawns){
                 pawn.move();
-                if (pawn.isMoving){
+                if (pawn.isMoving||pawn.isAttacking){
                     someoneIsMoving=true;
                     pawn.animate(time);
                     break;
@@ -488,7 +488,7 @@ public class MainActivity extends Activity {
                 // Choose the brush color for drawing
                 paint.setColor(Color.argb(255, 249, 129, 0));
 
-                while (playerPawns.size()==0){
+                while (playerPawns.size()<1){
                     canvas.drawText("You Lose", 20, 40, paint);
                     ourHolder.unlockCanvasAndPost(canvas);
                     return;
@@ -539,14 +539,19 @@ public class MainActivity extends Activity {
                 //instead of drawing pawns based on the grid data, just go thru these lists.
                 for (Pawn pawn: playerPawns){
                     int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
-                    canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                    //canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                    canvas.drawBitmap(pawn.Idle,pawn.frames[pawn.currentFrame],pawn.location,paint);
                 }
 
 
                 for (Pawn pawn: directorPawns){
                     if(pawn.hp>0) {
                         int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
-                        canvas.drawBitmap(pawn.animation[pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
+                        if (pawn.isAttacking){canvas.drawBitmap(pawn.Attack,pawn.attackFrames[pawn.currentFrame],pawn.location,paint);}
+                        //(temp.Idle,temp.frames[temp.currentFrame],wherePortrait,paint);
+                        else
+                            canvas.drawBitmap(pawn.Idle,pawn.frames[pawn.currentFrame],pawn.location,paint);
+                        //canvas.drawBitmap(pawn.animation[pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
                     }
                 }
 
@@ -615,7 +620,8 @@ public class MainActivity extends Activity {
             //
             double inrange=Math.sqrt(Math.pow((target.pawnXPosition - pawn.pawnXPosition), 2) + Math.pow((target.pawnYPosition - pawn.pawnYPosition), 2));
             if (inrange<pawn.pawnMoveSpeed){
-                target.kill();
+                pawn.attack(target);
+                //target.kill();
                 Log.d("Kill confirmed","Pawn has killed a player piece");
                 testVacate.Vacate();
                 pawn.hasMoved=true;

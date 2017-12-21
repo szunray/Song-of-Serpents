@@ -21,12 +21,19 @@ import java.io.InputStream;
  */
 
 public class Pawn {
+    public int[] carToIso(int cartX, int cartY) {
+        int isoX = cartX - cartY;
+        int isoY = (cartX + cartY) / 2;
+        int[] ans = {isoX, isoY};
+        return ans;
+    }
     // an array of images comprising the frames of an animation
     //There will eventually be 5 for every pawn
     //one for facing, away, to the left, to the right, and an idle animation
     Bitmap[] animation = new Bitmap[5];
     Bitmap portrait;
     Bitmap Idle;
+    Bitmap Attack;
 
     //Use frametimer and fps to determine if an animation should update.
     //increase frameTimer for slower animations theoretically
@@ -46,9 +53,11 @@ public class Pawn {
     boolean isAlly=true;
     boolean isMoving=false;
     boolean hasMoved=false;
+    boolean isAttacking=false;
 
-    public Rect frame = new Rect(0, 0 , 200, 200);
+    public RectF location = new RectF(0, 0 , 200, 200);
     public Rect frames[] = new Rect[7];
+    public Rect attackFrames[]=new Rect[5];
 
 
     //current frame is the index of the image in our animation array to use
@@ -57,35 +66,7 @@ public class Pawn {
 
     public Pawn(Context context, String animationPrefix){
 
-
-        for(int x=0; x<5; x++){
-            Resources resources = context.getResources();
-            String nameOfImage = animationPrefix+"_"+(x+1);
-            int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
-            animation[x] = BitmapFactory.decodeResource(resources,resId);
-
-
-
-
-        }
-
-        Resources resources = context.getResources();
-        String nameOfImage = "medusa";
-        int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
-        Idle = BitmapFactory.decodeResource(resources,resId);
-        //Idle=Bitmap.createScaledBitmap(Idle,200*frames.length,200,false);
-
-        try {
-            InputStream targetStream = context.getAssets().open("medusa.xml");
-            getFrames(targetStream);
-        }catch(Exception r){
-            Log.d("XMLREAD","File not found");
-        }
-
-        portrait= Bitmap.createScaledBitmap(animation[0],200,200,false);
-        currentFrame=0;
-        frameTimer=10;
-        fps=10;
+        this(context,animationPrefix,200,200);
 
     }
     public Pawn(Context context, String animationPrefix,float x, float y){
@@ -106,10 +87,16 @@ public class Pawn {
         String nameOfImage = "medusa";
         int resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
         Idle = BitmapFactory.decodeResource(resources,resId);
-        //Idle=Bitmap.createScaledBitmap(Idle,200*frames.length,200,false);
+        Idle = Bitmap.createScaledBitmap(Idle,524,92,false);
+        nameOfImage = "attack";
+        resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
+        Attack = BitmapFactory.decodeResource(resources,resId);
+        Attack = Bitmap.createScaledBitmap(Attack,221,206,false);
         try {
             InputStream targetStream = context.getAssets().open("medusa.xml");
-            getFrames(targetStream);
+            getFrames(targetStream,frames);
+            targetStream = context.getAssets().open("attack.xml");
+            getFrames(targetStream,attackFrames);
         }catch(Exception r){
             Log.d("XMLREAD","File not found");
         }
@@ -123,12 +110,24 @@ public class Pawn {
         frameTimer=10;
         fps=10;
         hasMoved=false;
+        int center[] = carToIso((int)pawnXPosition,(int)pawnYPosition);
+        location = new RectF(center[0],center[1], center[0]+200,center[1]+200);
 
     }
 
 
     public void animate(long gameTime){
-        if(gameTime>(frameTimer+fps)){
+        if (isAttacking){
+            if(gameTime>(frameTimer+fps)){
+                currentFrame += 1;
+                if (currentFrame>=5){
+                    currentFrame = 0;
+                    isAttacking=false;
+                }
+            }
+        }
+
+        else if(gameTime>(frameTimer+fps)){
             currentFrame += 1;
             if (currentFrame>=frameCount)
                 currentFrame = 0;
@@ -136,7 +135,13 @@ public class Pawn {
 
     }
 
-    public void getFrames(InputStream in)throws XmlPullParserException, IOException {
+    public void attack(Pawn target){
+        target.hp-=100;
+        isAttacking=true;
+        currentFrame=0;
+
+    }
+    public void getFrames(InputStream in, Rect[] frame)throws XmlPullParserException, IOException {
 
         float x = 0,y =0,w=0, h= 0;
        
@@ -161,12 +166,13 @@ public class Pawn {
                          y = Float.parseFloat(myparser.getAttributeValue(null,"y"));
                          w = Float.parseFloat(myparser.getAttributeValue(null,"w"));
                          h = Float.parseFloat(myparser.getAttributeValue(null,"h"));
-                         int scaleW=(int)Math.ceil(200/w);
+                         int scaleW=(int)Math.ceil(1);
                          //Log.d("ScaleW", "ScaleW is "+scaleW);
-                         int scaleH=(int)Math.ceil(200/h);
+                         int scaleH=(int)Math.ceil(1);
                          //Log.d("ScaleW", "ScaleH is "+scaleH);
 
-                         frames[iterator]=new Rect((int)x*scaleW,(int)y*scaleH,(int)x*scaleW+(int)(w*scaleW),(int)y*scaleH+(int)(h*scaleH));
+                         frame[iterator]=new Rect((int)x*scaleW,(int)y*scaleH,(int)x*scaleW+(int)(w*scaleW),(int)y*scaleH+(int)(h*scaleH));
+                         //frame[iterator]= new Rect((int)x,(int)y,x+w,y+h);
                          iterator ++;
 
                         //Log.d("XMLREAD","Event is"+x +" Iterator is" + iterator);
@@ -191,7 +197,7 @@ public class Pawn {
     }
     public void move(){
 
-        ;
+
         if (destination[0]==pawnXPosition&&destination[1]==pawnYPosition&&isMoving==false){
             isMoving=false;
             return;
@@ -216,7 +222,8 @@ public class Pawn {
             isMoving=false;
             hasMoved=true;
         }
-
+        int center[] = carToIso((int)pawnXPosition,(int)pawnYPosition);
+        location = new RectF(center[0],center[1], center[0]+200,center[1]+200);
 
     }
 

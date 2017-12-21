@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:811438da4f1f7ace2586f98f1016781a:587db8e528fc88ff3c08174eb5fb875a:76cc1e5510c52bc81cdc8f7311b1eaf9$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="attack.png" width="221" height="206">
+    <sprite n="isis_34.png" x="2" y="116" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_35.png" x="146" y="2" w="73" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_36.png" x="2" y="2" w="70" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_37.png" x="74" y="2" w="70" h="112" pX="0.5" pY="0.5"/>
+    <sprite n="isis_39.png" x="80" y="116" w="114" h="84" pX="0.5" pY="0.5"/>
+</TextureAtlas>

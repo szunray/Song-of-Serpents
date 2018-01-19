@@ -47,6 +47,12 @@ public class Tile {
             else if (type==3){
                 bitmap=tileType[2];
             }
+            else if (type==4){
+                bitmap=tileType[2];
+            }
+            else if (type==5){
+                bitmap=tileType[1];
+            }
 
     }
     // Theres probably a way better way to do all of this.

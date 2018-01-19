@@ -20,6 +20,7 @@ import android.view.SurfaceView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class MainActivity extends Activity {
@@ -140,8 +141,8 @@ public class MainActivity extends Activity {
 
         int map[] = new int[(w * h)];
         Tile grid[] = new Tile[(w * h)];
-
-
+        //Tile grid[]=new Tile[20];
+    String template = "5 1 1 1 1 1  1 1 1 1 1 4 1 1 1 1 1 1 1 1 4 1 1 4 1 5 4";
         public GameView(Context context) {
 
 
@@ -169,6 +170,7 @@ public class MainActivity extends Activity {
                 int ypos = (x / w) * TILE_HEIGHT;
                 grid[x] = new Tile(context.getApplicationContext(), xpos, ypos);
             }
+
 
 
 
@@ -338,15 +340,18 @@ public class MainActivity extends Activity {
 
 //--------------------------------------------------------------------------------------------------
         public void update(long time) {
+
             for (int x = 0; x < grid.length; x++) {
                 grid[x].reset();
             }
-            if (playerPawns.size()==0){
-                return;
+            Scanner templateReader=new Scanner(template);
+            int gridIndex=0;
+            while(templateReader.hasNextInt()){
+                int type=templateReader.nextInt();
+                grid[gridIndex].type=type;
+                //Log.d("TEMPL",gridIndex + "Has type "+ type);
+                gridIndex++;
             }
-
-
-
             // ensure the paws are occupying tiles
             for (Pawn temp : playerPawns) {
                 int currentX = (int) temp.pawnXPosition / 200;
@@ -367,10 +372,35 @@ public class MainActivity extends Activity {
                 int positionInArray = (currentY * numberOfColumns) + currentX;
 
                 if(temp.hp>0)
-                grid[positionInArray].setIsOccupied(temp);
+                    grid[positionInArray].setIsOccupied(temp);
                 else
                     grid[positionInArray].Vacate();
             }
+
+            if (playerPawns.size()==0){
+                return;
+            }
+
+
+
+            for (int x = 0; x < grid.length; x++) {
+                double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition - grid[x].posX), 2) + Math.pow((activePawn.pawnYPosition - grid[x].posY), 2));
+                if (Distance < activePawn.pawnMoveSpeed&&grid[x].type!=4) {
+                    grid[x].setType(2);
+                    if (grid[x].isOccupied){
+                        grid[x].setType(1);
+                        if(grid[x].pawn.isAlly==false){
+                            grid[x].setType(4);
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+
 
 
             //Keep track of who moved
@@ -379,11 +409,24 @@ public class MainActivity extends Activity {
             }
 
             //After player pieces have moved, their turn is over
-            //Spawn enemy pawn, have all enemy pawns chase.
+            //Spawn enemy pawn,
+
+            // have all enemy pawns chase.
             if (playerTurn==false){
-                Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
+
+                for(int x=0;x<grid.length;x++)
+                {
+                    if (grid[x].type==5){
+                        Log.d("SPAWN", "Spawning pawn");
+                        Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",grid[x].posX,grid[x].posY);
+                        enemyPawn.isAlly=false;
+                        //grid[x].setIsOccupied(enemyPawn);
+                        directorPawns.add(enemyPawn);
+                    }
+                }
+                /*Pawn enemyPawn = new Pawn(getContext().getApplicationContext(),"lamiawalk",0,0);
                 enemyPawn.isAlly=false;
-                directorPawns.add(enemyPawn);
+                directorPawns.add(enemyPawn);*/
 
                     for (Pawn pawn : directorPawns) {
                             autoChase(pawn);
@@ -398,28 +441,19 @@ public class MainActivity extends Activity {
 
             }
 
-            for (int x = 0; x < grid.length; x++) {
-                double Distance = Math.sqrt(Math.pow((activePawn.pawnXPosition - grid[x].posX), 2) + Math.pow((activePawn.pawnYPosition - grid[x].posY), 2));
-                if (Distance < activePawn.pawnMoveSpeed) {
-                    grid[x].setType(2);
-                    if (grid[x].isOccupied){
-                        grid[x].setType(1);
-                        if(grid[x].pawn.isAlly==false){
-                            grid[x].setType(4);
-                        }
-                    }
-                }
 
-            }
+
+
+            //grid[4].type=4;
 
             // Only the active pawn moves as you can see here.
             // This will need to be changed later, to accomodate Idle animations.
             someoneIsMoving=false;
             activePawn.move();
-            if (activePawn.isMoving) {
+          /*  if (activePawn.isMoving) {
                 someoneIsMoving=true;
                 activePawn.animate(time);
-            }
+            }*/
             for (Pawn pawn:playerPawns){
                 pawn.move();
                 if (pawn.isMoving||pawn.isAttacking){
@@ -536,9 +570,15 @@ public class MainActivity extends Activity {
 
                 //Draw the grid isometrically
                 for (int x = 0; x < grid.length; x++) {
-                    int[] isoTile = carToIso(grid[x].posX, grid[x].posY);
-                    canvas.drawBitmap(grid[x].bitmap, isoTile[0], isoTile[1], paint);
-                    canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
+                    if (grid[x].type==4){
+                        int[] isoTile = carToIso(grid[x].posX, grid[x].posY);
+                        canvas.drawText("Tile#" + x, isoTile[0], isoTile[1], paint);
+                    }
+                    else {
+                        int[] isoTile = carToIso(grid[x].posX, grid[x].posY);
+                        canvas.drawBitmap(grid[x].bitmap, isoTile[0], isoTile[1], paint);
+                        canvas.drawText("Tile type" + grid[x].type, isoTile[0], isoTile[1], paint);
+                    }
 
                 }
 
@@ -624,7 +664,7 @@ public class MainActivity extends Activity {
             //find viable targets to move to
             for (int x = 0; x < grid.length; x++) {
                 double Distance = Math.sqrt(Math.pow((pawn.pawnXPosition - grid[x].posX), 2) + Math.pow((pawn.pawnYPosition - grid[x].posY), 2));
-                if (Distance < pawn.pawnMoveSpeed&&grid[x].isOccupied==false) {
+                if (Distance < pawn.pawnMoveSpeed&&grid[x].isOccupied==false&&grid[x].type!=4) {
                     viable.add(grid[x]);
                 }
             }

@@ -281,9 +281,10 @@ public class MainActivity extends Activity {
                             if (grid[positionInArray].isOccupied) {// all this validation may not be necessary.
 
                                 if(grid[positionInArray].type==4){
-                                    grid[positionInArray].pawn.kill();
-                                    grid[positionInArray].Vacate();
-                                    activePawn.hasMoved=true;
+                                    activePawn.attack(grid[positionInArray].pawn);
+                                    //grid[positionInArray].pawn.kill();
+                                    //grid[positionInArray].Vacate();
+                                    //activePawn.hasMoved=true;
                                 }
                                 else if (grid[positionInArray].pawn.isAlly&&grid[positionInArray].pawn.hasMoved==false){
                                     activePawn = grid[positionInArray].pawn;
@@ -419,6 +420,15 @@ public class MainActivity extends Activity {
                 someoneIsMoving=true;
                 activePawn.animate(time);
             }
+            for (Pawn pawn:playerPawns){
+                pawn.move();
+                if (pawn.isMoving||pawn.isAttacking){
+                    someoneIsMoving=true;
+                    pawn.animate(time);
+                    break;
+                }
+
+            }
             for (Pawn pawn:directorPawns){
                 pawn.move();
                 if (pawn.isMoving||pawn.isAttacking){
@@ -539,7 +549,9 @@ public class MainActivity extends Activity {
                 //instead of drawing pawns based on the grid data, just go thru these lists.
                 for (Pawn pawn: playerPawns){
                     int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
+                    if (pawn.isAttacking){canvas.drawBitmap(pawn.Attack,pawn.attackFrames[pawn.currentFrame],pawn.location,paint);}
                     //canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                    else
                     canvas.drawBitmap(pawn.Idle,pawn.frames[pawn.currentFrame],pawn.location,paint);
                 }
 

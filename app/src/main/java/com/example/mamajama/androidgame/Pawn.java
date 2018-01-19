@@ -123,6 +123,7 @@ public class Pawn {
                 if (currentFrame>=5){
                     currentFrame = 0;
                     isAttacking=false;
+                    hasMoved=true;
                 }
             }
         }
@@ -138,7 +139,7 @@ public class Pawn {
     public void attack(Pawn target){
         target.hp-=100;
         isAttacking=true;
-        currentFrame=0;
+        currentFrame=1;
 
     }
     public void getFrames(InputStream in, Rect[] frame)throws XmlPullParserException, IOException {

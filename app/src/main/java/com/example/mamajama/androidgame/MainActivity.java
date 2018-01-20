@@ -645,6 +645,8 @@ public class MainActivity extends Activity {
         }
 
         public void autoChase(Pawn pawn){
+            if (playerPawns.size()==0)
+                return;
             List<Tile> viable = new ArrayList<Tile>();
             Pawn target=null;
             Tile testVacate=null;
@@ -676,6 +678,7 @@ public class MainActivity extends Activity {
                 //target.kill();
                 Log.d("Kill confirmed","Pawn has killed a player piece");
                 testVacate.Vacate();
+
                 pawn.hasMoved=true;
                 return;
             }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:c8fcfdf6c1a9cacf503cf405d244d4b6:d56187ebca38140a9ff67ce27ee36e37:8e27ab23ebbb6cd9d1321d9f8e3c1846$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="isis.png" width="497" height="1082">
+    <sprite n="isis_01.png" x="1" y="1" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_02.png" x="78" y="1" w="74" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_03.png" x="153" y="1" w="70" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_04.png" x="224" y="1" w="70" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_05.png" x="295" y="1" w="73" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_06.png" x="369" y="1" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_07.png" x="1" y="92" w="77" h="87" pX="0.5" pY="0.5"/>
+    <sprite n="isis_08.png" x="79" y="92" w="64" h="103" pX="0.5" pY="0.5"/>
+    <sprite n="isis_09.png" x="144" y="92" w="60" h="105" pX="0.5" pY="0.5"/>
+    <sprite n="isis_10.png" x="205" y="92" w="60" h="105" pX="0.5" pY="0.5"/>
+    <sprite n="isis_11.png" x="266" y="92" w="60" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_12.png" x="327" y="92" w="65" h="103" pX="0.5" pY="0.5"/>
+    <sprite n="isis_13.png" x="393" y="92" w="66" h="101" pX="0.5" pY="0.5"/>
+    <sprite n="isis_14.png" x="1" y="198" w="66" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_19.png" x="68" y="198" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_20.png" x="145" y="198" w="85" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_21.png" x="231" y="198" w="98" h="91" pX="0.5" pY="0.5"/>
+    <sprite n="isis_22.png" x="330" y="198" w="76" h="92" pX="0.5" pY="0.5"/>
+    <sprite n="isis_23.png" x="407" y="198" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_24.png" x="1" y="301" w="85" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_27.png" x="87" y="301" w="64" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_28.png" x="152" y="301" w="89" h="110" pX="0.5" pY="0.5"/>
+    <sprite n="isis_29.png" x="242" y="301" w="104" h="113" pX="0.5" pY="0.5"/>
+    <sprite n="isis_30.png" x="347" y="301" w="79" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_31.png" x="427" y="301" w="64" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_32.png" x="1" y="415" w="89" h="110" pX="0.5" pY="0.5"/>
+    <sprite n="isis_34.png" x="91" y="415" w="76" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_35.png" x="168" y="415" w="73" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_36.png" x="242" y="415" w="70" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_37.png" x="313" y="415" w="70" h="112" pX="0.5" pY="0.5"/>
+    <sprite n="isis_38.png" x="384" y="415" w="71" h="108" pX="0.5" pY="0.5"/>
+    <sprite n="isis_39.png" x="1" y="528" w="114" h="84" pX="0.5" pY="0.5"/>
+    <sprite n="isis_43.png" x="116" y="528" w="64" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_44.png" x="181" y="528" w="60" h="105" pX="0.5" pY="0.5"/>
+    <sprite n="isis_45.png" x="242" y="528" w="59" h="127" pX="0.5" pY="0.5"/>
+    <sprite n="isis_46.png" x="302" y="528" w="60" h="126" pX="0.5" pY="0.5"/>
+    <sprite n="isis_47.png" x="363" y="528" w="61" h="126" pX="0.5" pY="0.5"/>
+    <sprite n="isis_48.png" x="1" y="656" w="103" h="111" pX="0.5" pY="0.5"/>
+    <sprite n="isis_52_02.png" x="105" y="656" w="66" h="98" pX="0.5" pY="0.5"/>
+    <sprite n="isis_59.png" x="172" y="656" w="112" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_67.png" x="285" y="656" w="71" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_68.png" x="357" y="656" w="68" h="91" pX="0.5" pY="0.5"/>
+    <sprite n="isis_69.png" x="426" y="656" w="70" h="92" pX="0.5" pY="0.5"/>
+    <sprite n="isis_70.png" x="1" y="768" w="71" h="91" pX="0.5" pY="0.5"/>
+    <sprite n="isis_71.png" x="73" y="768" w="73" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_72.png" x="147" y="768" w="73" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_73.png" x="221" y="768" w="72" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_74.png" x="294" y="768" w="60" h="103" pX="0.5" pY="0.5"/>
+    <sprite n="isis_75.png" x="355" y="768" w="60" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_76.png" x="416" y="768" w="62" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_77.png" x="1" y="873" w="65" h="103" pX="0.5" pY="0.5"/>
+    <sprite n="isis_78.png" x="67" y="873" w="66" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_79.png" x="134" y="873" w="66" h="103" pX="0.5" pY="0.5"/>
+    <sprite n="isis_80.png" x="201" y="873" w="66" h="102" pX="0.5" pY="0.5"/>
+    <sprite n="isis_91.png" x="268" y="873" w="68" h="91" pX="0.5" pY="0.5"/>
+    <sprite n="isis_92.png" x="337" y="873" w="70" h="92" pX="0.5" pY="0.5"/>
+    <sprite n="isis_93.png" x="408" y="873" w="74" h="91" pX="0.5" pY="0.5"/>
+    <sprite n="isis_94.png" x="1" y="977" w="74" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_95.png" x="76" y="977" w="74" h="89" pX="0.5" pY="0.5"/>
+    <sprite n="isis_96.png" x="151" y="977" w="74" h="88" pX="0.5" pY="0.5"/>
+    <sprite n="isis_97.png" x="226" y="977" w="71" h="90" pX="0.5" pY="0.5"/>
+    <sprite n="isis_98.png" x="298" y="977" w="60" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_99.png" x="359" y="977" w="62" h="104" pX="0.5" pY="0.5"/>
+    <sprite n="isis_100.png" x="422" y="977" w="65" h="103" pX="0.5" pY="0.5"/>
+</TextureAtlas>

@@ -10,6 +10,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
@@ -456,9 +457,9 @@ public class MainActivity extends Activity {
             }*/
             for (Pawn pawn:playerPawns){
                 pawn.move();
+                pawn.animate(time);
                 if (pawn.isMoving||pawn.isAttacking){
                     someoneIsMoving=true;
-                    pawn.animate(time);
                     break;
                 }
 
@@ -589,20 +590,24 @@ public class MainActivity extends Activity {
                 //instead of drawing pawns based on the grid data, just go thru these lists.
                 for (Pawn pawn: playerPawns){
                     int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
-                    if (pawn.isAttacking){canvas.drawBitmap(pawn.Attack,pawn.attackFrames[pawn.currentFrame],pawn.location,paint);}
-                    //canvas.drawBitmap(pawn.animation[pawn.currentFrame],isoPawn[0],isoPawn[1]-100,paint);
+                    if (pawn.isAttacking){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.attackIndex],pawn.location,paint);}
+
+                    else if (pawn.isMoving)
+                    canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.walkIndex],pawn.location,paint);
                     else
-                    canvas.drawBitmap(pawn.Idle,pawn.frames[pawn.currentFrame],pawn.location,paint);
+                        canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame],pawn.location,paint);
                 }
 
 
                 for (Pawn pawn: directorPawns){
                     if(pawn.hp>0) {
                         int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
-                        if (pawn.isAttacking){canvas.drawBitmap(pawn.Attack,pawn.attackFrames[pawn.currentFrame],pawn.location,paint);}
-                        //(temp.Idle,temp.frames[temp.currentFrame],wherePortrait,paint);
-                        else
-                            canvas.drawBitmap(pawn.Idle,pawn.frames[pawn.currentFrame],pawn.location,paint);
+                        if (pawn.isAttacking){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.attackIndex],pawn.location,paint);}
+
+                        else {
+
+                            canvas.drawBitmap(pawn.spriteSheet, pawn.fullAnim[pawn.currentFrame + pawn.walkIndex], pawn.location, paint);
+                        }
                         //canvas.drawBitmap(pawn.animation[pawn.currentFrame], isoPawn[0], isoPawn[1] - 100, paint);
                     }
                 }
@@ -630,7 +635,7 @@ public class MainActivity extends Activity {
                     }
                     RectF wherePortrait=new RectF(-Cam[0]+200*pawnIndex,-Cam[1],-Cam[0]+200+200*pawnIndex,-Cam[1]+200);
 
-                    canvas.drawBitmap(temp.Idle,temp.frames[temp.currentFrame],wherePortrait,paint);
+                    canvas.drawBitmap(temp.spriteSheet,temp.fullAnim[1],wherePortrait,paint);
 
                     pawnIndex+=1;
                 }
@@ -675,7 +680,6 @@ public class MainActivity extends Activity {
             double inrange=Math.sqrt(Math.pow((target.pawnXPosition - pawn.pawnXPosition), 2) + Math.pow((target.pawnYPosition - pawn.pawnYPosition), 2));
             if (inrange<pawn.pawnMoveSpeed){
                 pawn.attack(target);
-                //target.kill();
                 Log.d("Kill confirmed","Pawn has killed a player piece");
                 testVacate.Vacate();
 
@@ -702,8 +706,6 @@ public class MainActivity extends Activity {
                 pawn.setDestination(targetTile.posX,targetTile.posY);
                 targetTile.setIsOccupied(pawn);
                 pawn.move();
-                //playerTurn=true;
-                //resetTurn();
             }
 
 

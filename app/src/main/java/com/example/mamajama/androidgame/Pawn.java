@@ -34,6 +34,7 @@ public class Pawn {
     Bitmap portrait;
     Bitmap Idle;
     Bitmap Attack;
+    Bitmap spriteSheet;
 
     //Use frametimer and fps to determine if an animation should update.
     //increase frameTimer for slower animations theoretically
@@ -49,6 +50,8 @@ public class Pawn {
     float destination[] = {200,200};
 
     int hp=100;
+    int walkIndex = 14;
+    int attackIndex = 26;
 
     boolean isAlly=true;
     boolean isMoving=false;
@@ -56,9 +59,8 @@ public class Pawn {
     boolean isAttacking=false;
 
     public RectF location = new RectF(0, 0 , 200, 200);
-    public Rect frames[] = new Rect[7];
-    public Rect attackFrames[]=new Rect[5];
 
+    public Rect fullAnim[] = new Rect[38];
 
     //current frame is the index of the image in our animation array to use
     int currentFrame ;
@@ -92,11 +94,18 @@ public class Pawn {
         resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
         Attack = BitmapFactory.decodeResource(resources,resId);
         Attack = Bitmap.createScaledBitmap(Attack,221,206,false);
+
+        nameOfImage = "isis";
+        resId = context.getResources().getIdentifier(nameOfImage, "drawable", context.getPackageName());
+        spriteSheet = BitmapFactory.decodeResource(resources,resId);
+        spriteSheet = Bitmap.createScaledBitmap(spriteSheet,497,1082,false);
+
         try {
             InputStream targetStream = context.getAssets().open("medusa.xml");
-            getFrames(targetStream,frames);
-            targetStream = context.getAssets().open("attack.xml");
-            getFrames(targetStream,attackFrames);
+
+
+            targetStream = context.getAssets().open("isis.xml");
+            getFrames(targetStream,fullAnim);
         }catch(Exception r){
             Log.d("XMLREAD","File not found");
         }
@@ -120,7 +129,7 @@ public class Pawn {
         if (isAttacking){
             if(gameTime>(frameTimer+fps)){
                 currentFrame += 1;
-                if (currentFrame>=5){
+                if (currentFrame>5){
                     currentFrame = 0;
                     isAttacking=false;
                     hasMoved=true;
@@ -130,9 +139,10 @@ public class Pawn {
 
         else if(gameTime>(frameTimer+fps)){
             currentFrame += 1;
-            if (currentFrame>=frameCount)
+            if (currentFrame>5)
                 currentFrame = 0;
         }
+
 
     }
 
@@ -223,8 +233,12 @@ public class Pawn {
             isMoving=false;
             hasMoved=true;
         }
+       if (isMoving==false&&isAlly==false)
+           currentFrame=0;
         int center[] = carToIso((int)pawnXPosition,(int)pawnYPosition);
-        location = new RectF(center[0],center[1], center[0]+200,center[1]+200);
+        float scaleX=200/fullAnim[currentFrame+14].width();
+
+        location = new RectF(center[0],center[1], center[0]+(100*scaleX),center[1]+(100*scaleX));
 
     }
 

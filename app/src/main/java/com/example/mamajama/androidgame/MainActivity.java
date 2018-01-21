@@ -654,15 +654,38 @@ public class MainActivity extends Activity {
                 return;
             List<Tile> viable = new ArrayList<Tile>();
             Pawn target=null;
-            Tile testVacate=null;
+            Tile toVacate=null;
             //find target
+            List<Pawn> possibleTargets = new ArrayList<Pawn>();
             for (int x = 0; x < grid.length; x++) {
                 if (grid[x].isOccupied)
                     if(grid[x].pawn.isAlly){
-                    target = grid[x].pawn;
+                    possibleTargets.add(grid[x].pawn);
+                    /*target = grid[x].pawn;
                     testVacate=grid[x];
-                    break;
+                    break;*/
                     }
+            }
+            if(possibleTargets.size()==0)
+                return;
+
+            target = possibleTargets.get(0);
+            double distanceToClosestTarget = getDistance(pawn,target);
+            toVacate = grid[getPositionInArray(target)];
+
+
+            for (Pawn possibleTarget:possibleTargets){
+                if (getDistance(pawn,possibleTarget)<distanceToClosestTarget){
+                    target=possibleTarget;
+                    distanceToClosestTarget=getDistance(pawn,target);
+
+                    int currentX = (int) target.pawnXPosition / 200;
+                    int currentY = (int) target.pawnYPosition / 200;
+                    int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
+                    int positionInArray = (currentY * numberOfColumns) + currentX;
+                    toVacate = grid[positionInArray];
+                }
+
             }
             if (target==null){
                 return;
@@ -680,8 +703,10 @@ public class MainActivity extends Activity {
             double inrange=Math.sqrt(Math.pow((target.pawnXPosition - pawn.pawnXPosition), 2) + Math.pow((target.pawnYPosition - pawn.pawnYPosition), 2));
             if (inrange<pawn.pawnMoveSpeed){
                 pawn.attack(target);
-                Log.d("Kill confirmed","Pawn has killed a player piece");
-                testVacate.Vacate();
+                //Log.d("Kill confirmed","Pawn has killed a player piece");
+                //testVacate.Vacate();
+                if(target.hp<1)
+                toVacate.Vacate();
 
                 pawn.hasMoved=true;
                 return;
@@ -740,6 +765,18 @@ public class MainActivity extends Activity {
             playing = true;
             gameThread = new Thread(this);
             gameThread.start();
+        }
+        public double getDistance(Pawn X, Pawn Y){
+            double distance = Math.sqrt(Math.pow((X.pawnXPosition - Y.pawnXPosition), 2) + Math.pow((X.pawnYPosition - Y.pawnYPosition), 2));
+            return distance;
+        }
+        public int getPositionInArray(Pawn target){
+
+            int currentX = (int) target.pawnXPosition / 200;
+            int currentY = (int) target.pawnYPosition / 200;
+            int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
+            int positionInArray = (currentY * numberOfColumns) + currentX;
+          return positionInArray;
         }
     }
 }

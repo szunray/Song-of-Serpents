@@ -147,7 +147,7 @@ public class Pawn {
     }
 
     public void attack(Pawn target){
-        target.hp-=100;
+        target.hp-=50;
         isAttacking=true;
         currentFrame=1;
 

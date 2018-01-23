@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
@@ -35,6 +36,7 @@ public class MainActivity extends Activity {
     //Camera offsets are set right before the Pawn is Drawn
     public static int CAMERA_X = 0;
     public static int CAMERA_Y = 0;
+    public static int CAMERA_TIME=0;
 
     //These are Camera Panning variables
     //need to stay global
@@ -44,7 +46,7 @@ public class MainActivity extends Activity {
 
 
     GameView gameView;
-    GameUI basicUI = new GameUI(CAMERA_X,CAMERA_Y);
+
 
     public boolean someoneIsMoving=false;
 
@@ -124,6 +126,8 @@ public class MainActivity extends Activity {
         //Not sure how pawns will spawn in final game
         List<Pawn> playerPawns = new ArrayList<Pawn>();
         List<Pawn> directorPawns= new ArrayList<Pawn>();
+        List<GameUI>UIObjects = new ArrayList<GameUI>();
+
         Pawn activePawn;
         Pawn Lamia;
 
@@ -164,6 +168,8 @@ public class MainActivity extends Activity {
             playerPawns.add(activePawn);
             playerPawns.add(Lamia);
 
+            GameUI basicUI = new GameUI(CAMERA_X,CAMERA_Y);
+            UIObjects.add(basicUI);
 
             //Instancing grid
             for (int x = 0; x < grid.length; x++) {
@@ -204,6 +210,16 @@ public class MainActivity extends Activity {
                         nextPawn();
                     }
                 }
+                i=UIObjects.size();
+                for (int x=0;x<i;x++){
+                    if (UIObjects.get(x).section==null){
+                        UIObjects.remove(UIObjects.get(x));
+                        x--;
+                        i--;
+                    }
+                }
+
+
                 //Then update
                 update(startFrameTime);
 
@@ -251,8 +267,10 @@ public class MainActivity extends Activity {
                     int[] cartesianClick = isoToCar((int) motionEvent.getX() - isoCam[0], (int) (motionEvent.getY() - isoCam[1]));
 
                     //first check if the click is inside a UI element.
-                    if (basicUI.isInsideOf(cartesianClick[0],cartesianClick[1])){
-                        nextPawn();
+                    for(GameUI ui : UIObjects) {
+                        if (ui.isInsideOf(cartesianClick[0], cartesianClick[1])&&!ui.attackUI) {
+                            nextPawn();
+                        }
                     }
 
                     //then check to see if it is inside of the grid.
@@ -284,13 +302,27 @@ public class MainActivity extends Activity {
                             if (grid[positionInArray].isOccupied) {// all this validation may not be necessary.
 
                                 if(grid[positionInArray].type==4){
-                                    activePawn.attack(grid[positionInArray].pawn);
+                                    for(GameUI ui : UIObjects){
+                                        if(ui.attackUI){
+                                            ui.section=null;
+                                        }
+                                    }
+                                    GameUI attackUI=new GameUI(grid[positionInArray].pawn,activePawn);
+                                    UIObjects.add(attackUI);
+                                    //activePawn.attack(grid[positionInArray].pawn);
                                     //grid[positionInArray].pawn.kill();
                                     //grid[positionInArray].Vacate();
                                     //activePawn.hasMoved=true;
                                 }
                                 else if (grid[positionInArray].pawn.isAlly&&grid[positionInArray].pawn.hasMoved==false){
                                     activePawn = grid[positionInArray].pawn;
+
+                                        for(GameUI ui : UIObjects){
+                                            if(ui.attackUI){
+                                                ui.section=null;
+                                            }
+                                        }
+
                                     isPanning = false;
                                 }
 
@@ -466,7 +498,10 @@ public class MainActivity extends Activity {
             }
             for (Pawn pawn:directorPawns){
                 pawn.move();
-                if (pawn.isMoving||pawn.isAttacking){
+                if(pawn.knockedDown){
+                    pawn.animate(time);
+                }
+                else if (pawn.isMoving||pawn.isAttacking){
                     someoneIsMoving=true;
                     pawn.animate(time);
                     break;
@@ -497,6 +532,15 @@ public class MainActivity extends Activity {
 
                 if(playerPawns.get(playerIndex).hasMoved==false) {
                     activePawn = playerPawns.get(playerIndex);
+
+
+                        for(GameUI ui : UIObjects) {
+                            if (ui.attackUI) {
+                                ui.section = null;
+                            }
+                        }
+
+
                     return;
                 }
                 else
@@ -520,6 +564,7 @@ public class MainActivity extends Activity {
             //Ensure the drawing surface exists
 
             if (ourHolder.getSurface().isValid()) {
+
                 // Lock the canvas ready to draw
                 // Make the drawing surface our canvas object
 
@@ -559,15 +604,39 @@ public class MainActivity extends Activity {
                 } catch (IndexOutOfBoundsException e) {
                     System.err.println("IndexOutOfBoundsException: " + e.getMessage());
                 }
+
                 if (isPanning == false) {
+                    //smooth panning
+                    int diffX = (int)(-activePawn.getX() + 900)-CAMERA_X;
+                    int diffY = (int)(-activePawn.getY() + 300)-CAMERA_Y;
+                    Log.d("DIFF", "destY = " +(-activePawn.getY() + 900)+ "dest x");
+                    Log.d("DIFF", "currentY = " + CAMERA_Y);
+                    Log.d("DIFF", "Difference = " + diffY);
+
+                    CAMERA_X+=(diffX/fps);
+                    CAMERA_Y+=(diffY/fps);
+                    CAMERA_TIME++;
+                    Log.d("DIFF", "CamTick "+CAMERA_TIME);
+                    // If it takes too long to center, snap to the other pawn
+                    if(CAMERA_TIME>20){
                     CAMERA_Y = (int) -activePawn.getY() + 300;
                     CAMERA_X = (int) -activePawn.getX() + 900;
+                    CAMERA_TIME=0;
+                    Log.d("DIFF", "CamTick hit 20");
+                    isPanning=true;}
                 }
                 int[] Cam = carToIso(CAMERA_X, CAMERA_Y);
+                //----------------
+
                 canvas.translate(Cam[0], Cam[1]);
+
+
+                //canvas.translate(CAMERA_X,CAMERA_Y);
                 // basicUI needs to be updated as the canvas translates.
                 //To remain firmly in place.
-                basicUI.update(CAMERA_X,CAMERA_Y);
+                for (GameUI ui:UIObjects) {
+                    ui.update(CAMERA_X, CAMERA_Y);
+                }
 
                 //Draw the grid isometrically
                 for (int x = 0; x < grid.length; x++) {
@@ -592,6 +661,8 @@ public class MainActivity extends Activity {
                     int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
                     if (pawn.isAttacking){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.attackIndex],pawn.location,paint);}
 
+                    else if(pawn.knockedDown){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.knockdownIndex],pawn.location,paint);}
+
                     else if (pawn.isMoving)
                     canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.walkIndex],pawn.location,paint);
                     else
@@ -603,6 +674,7 @@ public class MainActivity extends Activity {
                     if(pawn.hp>0) {
                         int[] isoPawn = carToIso((int) pawn.getX(), (int) pawn.getY());
                         if (pawn.isAttacking){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.attackIndex],pawn.location,paint);}
+                        else if(pawn.knockedDown){canvas.drawBitmap(pawn.spriteSheet,pawn.fullAnim[pawn.currentFrame+pawn.knockdownIndex],pawn.location,paint);}
 
                         else {
 
@@ -615,7 +687,9 @@ public class MainActivity extends Activity {
                 //So UI is going to be objects that get drawn last.
                 //They're based on the isometric camera location, so they should remain "static"
                 //over the grid. Eventually, we'll add them to an arrayList to keep em straight.
-                basicUI.draw(canvas,paint);
+                for(GameUI ui : UIObjects) {
+                    ui.draw(canvas, paint);
+                }
 
 
 
@@ -650,6 +724,11 @@ public class MainActivity extends Activity {
         }
 
         public void autoChase(Pawn pawn){
+            if (pawn.knockedDown){
+                pawn.knockedDown=false;
+                pawn.hasMoved=true;
+                return;
+            }
             if (playerPawns.size()==0)
                 return;
             List<Tile> viable = new ArrayList<Tile>();
@@ -739,6 +818,10 @@ public class MainActivity extends Activity {
         public void resetTurn(){
             for (Pawn temp:playerPawns){
                 temp.hasMoved=false;
+                if (temp.knockedDown){
+                    temp.knockedDown=false;
+                    //temp.hasMoved=true;
+                }
             }
 
         }

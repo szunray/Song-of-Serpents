@@ -52,15 +52,17 @@ public class Pawn {
     int hp=100;
     int walkIndex = 14;
     int attackIndex = 26;
+    int knockdownIndex=38;
 
     boolean isAlly=true;
     boolean isMoving=false;
     boolean hasMoved=false;
     boolean isAttacking=false;
+    boolean knockedDown=false;
 
     public RectF location = new RectF(0, 0 , 200, 200);
 
-    public Rect fullAnim[] = new Rect[38];
+    public Rect fullAnim[] = new Rect[40];
 
     //current frame is the index of the image in our animation array to use
     int currentFrame ;
@@ -126,13 +128,29 @@ public class Pawn {
 
 
     public void animate(long gameTime){
+
         if (isAttacking){
+            //Log.d("ATK","Attack begins");
             if(gameTime>(frameTimer+fps)){
                 currentFrame += 1;
+                Log.d("ATK","Current Frame "+currentFrame);
                 if (currentFrame>5){
                     currentFrame = 0;
                     isAttacking=false;
                     hasMoved=true;
+                    Log.d("ATK","Attack complete");
+                }
+            }
+        }
+
+
+        else if (knockedDown){
+            if(gameTime>(frameTimer*1000+fps)){
+
+                currentFrame +=1;
+                if (currentFrame>1){
+                    currentFrame = 1;
+
                 }
             }
         }
@@ -148,8 +166,10 @@ public class Pawn {
 
     public void attack(Pawn target){
         target.hp-=50;
+        target.knockedDown=true;
+        target.currentFrame=0;
         isAttacking=true;
-        currentFrame=1;
+        currentFrame=0;
 
     }
     public void getFrames(InputStream in, Rect[] frame)throws XmlPullParserException, IOException {

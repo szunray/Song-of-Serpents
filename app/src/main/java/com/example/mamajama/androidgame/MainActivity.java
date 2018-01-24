@@ -13,6 +13,8 @@ import android.graphics.Paint;
 
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -148,11 +150,42 @@ public class MainActivity extends Activity {
         Tile grid[] = new Tile[(w * h)];
         //Tile grid[]=new Tile[20];
     String template = "5 1 1 1 1 1  1 1 1 1 1 4 1 1 1 1 1 1 1 1 4 1 1 4 1 5 4";
-        public GameView(Context context) {
 
+    public boolean checkNetworkConnection() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        boolean isConnected = false;
+        if (networkInfo != null && (isConnected = networkInfo.isConnected())) {
+            Log.d("SONG", "Connection established");
+
+
+        } else {
+            // show "Not Connected"
+            Log.d("SONG", "No connection");
+        }
+
+        return isConnected;
+    }
+
+        public GameView(Context context) {
+            super(context);
+
+            boolean connection = checkNetworkConnection();
+            HttpPostAsyncTask task = new HttpPostAsyncTask();
+            String myUrl= "https://medium.com/@JasonCromer/android-asynctask-http-request-tutorial-6b429d833e28";
+            String s;
+            try {
+                 s = task.execute(myUrl).get();
+            }
+            catch(Exception e){
+                s = "failed";
+            }
+            Log.d("SONG", "s = "+s);
 
             //Have SurfaceView set up our object
-            super(context);
+
 
             //Initialize Holder and Paint objects
             ourHolder = getHolder();

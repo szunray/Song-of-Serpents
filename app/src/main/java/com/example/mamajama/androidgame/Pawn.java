@@ -60,6 +60,8 @@ public class Pawn {
     boolean isAttacking=false;
     boolean knockedDown=false;
 
+    int playerPermissions;
+
     public RectF location = new RectF(0, 0 , 200, 200);
 
     public Rect fullAnim[] = new Rect[40];

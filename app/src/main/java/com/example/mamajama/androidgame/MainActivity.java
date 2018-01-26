@@ -23,6 +23,7 @@ import android.view.SurfaceView;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -145,6 +146,7 @@ public class MainActivity extends Activity {
 
         int w = (SCREEN_WIDTH / TILE_WIDTH);
         int h = (SCREEN_HEIGHT / TILE_HEIGHT);
+        int userPermissions=0;
 
         int map[] = new int[(w * h)];
         Tile grid[] = new Tile[(w * h)];
@@ -172,18 +174,6 @@ public class MainActivity extends Activity {
         public GameView(Context context) {
             super(context);
 
-            boolean connection = checkNetworkConnection();
-            HttpPostAsyncTask task = new HttpPostAsyncTask();
-            String myUrl= "https://medium.com/@JasonCromer/android-asynctask-http-request-tutorial-6b429d833e28";
-            String s;
-            try {
-                 s = task.execute(myUrl).get();
-            }
-            catch(Exception e){
-                s = "failed";
-            }
-            Log.d("SONG", "s = "+s);
-
             //Have SurfaceView set up our object
 
 
@@ -194,7 +184,10 @@ public class MainActivity extends Activity {
             //instantiating Pawn
             //Bug: If enemy pawn doesnt move, you can select it!
             Lamia = new Pawn(context.getApplicationContext(), "lamiawalk", 400, 400);
+            Lamia.playerPermissions=1;
             activePawn = new Pawn(context.getApplicationContext(), "lamiawalk");
+            activePawn.playerPermissions=2;
+
             Pawn enemyPawn = new Pawn(context.getApplicationContext(),"lamiawalk",0,0);
             enemyPawn.isAlly=false;
 
@@ -363,7 +356,16 @@ public class MainActivity extends Activity {
 
                             if (grid[positionInArray].type == 2) {
                                 //Log.d("Destination","Position in area is "+positionInArray);
-                                activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
+                                if(activePawn.playerPermissions==userPermissions) {
+                                    HttpGetAsyncTask setDest= new HttpGetAsyncTask();
+                                    HashMap<String,String> data = new HashMap<String, String>();
+                                    data.put("Pawn",Integer.toString(userPermissions));
+                                    data.put("X",Integer.toString(cartesianClick[0]));
+                                    data.put("Y",Integer.toString(cartesianClick[1]));
+                                    data.put("URL","http://10.0.2.2/songofservers/getstate");
+                                    setDest.execute(data);
+                                    activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
+                                }
 
                             }
 
@@ -407,16 +409,49 @@ public class MainActivity extends Activity {
 //--------------------------------------------------------------------------------------------------
         public void update(long time) {
 
+
             for (int x = 0; x < grid.length; x++) {
                 grid[x].reset();
             }
-            Scanner templateReader=new Scanner(template);
+            boolean connection = checkNetworkConnection();
+            HttpGetAsyncTask task = new HttpGetAsyncTask();
+            String myUrl= "http://10.0.2.2/songofservers/getstate";
+            String startingState;
+            try {
+                startingState = task.execute(myUrl).get();
+            }
+            catch(Exception e){
+                startingState = "failed";
+            }
+            startingState=startingState.replaceAll("[^0-9]+"," ");
+            Log.d("SONG", "s = "+startingState);
+
+            Scanner templateReader=new Scanner(startingState);
             int gridIndex=0;
             while(templateReader.hasNextInt()){
                 int type=templateReader.nextInt();
+                Log.d("GRIDTYPE", "Type = "+type);
                 grid[gridIndex].type=type;
                 //Log.d("TEMPL",gridIndex + "Has type "+ type);
                 gridIndex++;
+            }
+
+            Log.d("PLAYER", "User Permissions "+userPermissions);
+            if (userPermissions<1) {
+                try {
+                    HttpGetAsyncTask getNumber = new HttpGetAsyncTask();
+                    myUrl = "http://10.0.2.2/songofservers/getpermission";
+                    String s = getNumber.execute(myUrl).get();
+                    Log.d("PLAYER", "Player : "+s);
+
+                    s = s.replaceAll("[^0-9]+"," ");
+                    Scanner numberGetter=new Scanner(s);
+                    userPermissions=numberGetter.nextInt();
+                }
+                catch(Exception e){
+                    Log.d("PLAYER", "Player : FAILED");
+                    e.printStackTrace();
+                }
             }
             // ensure the paws are occupying tiles
             for (Pawn temp : playerPawns) {
@@ -646,6 +681,8 @@ public class MainActivity extends Activity {
                     Log.d("DIFF", "currentY = " + CAMERA_Y);
                     Log.d("DIFF", "Difference = " + diffY);
 
+                    if(fps==0)
+                        fps=1;
                     CAMERA_X+=(diffX/fps);
                     CAMERA_Y+=(diffY/fps);
                     CAMERA_TIME++;

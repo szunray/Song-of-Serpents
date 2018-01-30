@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         boolean isConnected = false;
         if (networkInfo != null && (isConnected = networkInfo.isConnected())) {
-            Log.d("SONG", "Connection established");
+
 
 
         } else {
@@ -362,7 +362,7 @@ public class MainActivity extends Activity {
                                     data.put("Pawn",Integer.toString(userPermissions));
                                     data.put("X",Integer.toString(cartesianClick[0]));
                                     data.put("Y",Integer.toString(cartesianClick[1]));
-                                    data.put("URL","http://10.0.2.2/songofservers/getstate");
+                                    data.put("URL","http://192.168.0.110/songofservers/getupdates");
                                     setDest.execute(data);
                                     activePawn.setDestination(cartesianClick[0], cartesianClick[1]);
                                 }
@@ -413,18 +413,29 @@ public class MainActivity extends Activity {
             for (int x = 0; x < grid.length; x++) {
                 grid[x].reset();
             }
+            //Beginning network stuffs
             boolean connection = checkNetworkConnection();
             HttpGetAsyncTask task = new HttpGetAsyncTask();
-            String myUrl= "http://10.0.2.2/songofservers/getstate";
+            String myUrl= "http://192.168.0.110/songofservers/getupdates";
             String startingState;
+            String playerData;
             try {
                 startingState = task.execute(myUrl).get();
+
+                playerData=startingState.substring(startingState.indexOf("Player Data"),startingState.indexOf("Game"));
+                Log.d("RETRIEVED", "Retrieved: "+ playerData);
+                applyNetworkUpdate(playerPawns,playerData);
+                startingState=startingState.substring(startingState.indexOf("Game"));
+                Log.d("RETRIEVED", "Retrieved: "+ startingState);
             }
             catch(Exception e){
                 startingState = "failed";
             }
+
+
+            //Parsing the string it got from the server
             startingState=startingState.replaceAll("[^0-9]+"," ");
-            Log.d("SONG", "s = "+startingState);
+            Log.d("RETRIEVED", "s = "+startingState);
 
             Scanner templateReader=new Scanner(startingState);
             int gridIndex=0;
@@ -436,6 +447,8 @@ public class MainActivity extends Activity {
                 gridIndex++;
             }
 
+            //Find out which snake the player is controlling.
+            //Default setting is "0" which is neither snake.
             Log.d("PLAYER", "User Permissions "+userPermissions);
             if (userPermissions<1) {
                 try {
@@ -930,6 +943,23 @@ public class MainActivity extends Activity {
             int numberOfColumns = SCREEN_WIDTH / TILE_WIDTH;
             int positionInArray = (currentY * numberOfColumns) + currentX;
           return positionInArray;
+        }
+        public void applyNetworkUpdate(List<Pawn> players, String playerState){
+            String[] entries = playerState.split("Pawn");
+            for(String entry:entries){
+                Log.d("ANU",entry);
+            }
+            int count=playerState.split("Pawn").length;
+            for (int x=1;x<count;x++){
+                entries[x]=entries[x].replaceAll("[^0-9]+"," ");
+                Scanner entryReader = new Scanner (entries[x]);
+                int pawnIndex=entryReader.nextInt();
+                int xDest = entryReader.nextInt();
+                int yDest= entryReader.nextInt();
+                players.get(pawnIndex).setDestination(xDest,yDest);
+            }
+
+
         }
     }
 }

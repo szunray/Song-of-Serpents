@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,6 +34,7 @@ public class HttpGetAsyncTask extends AsyncTask<Object, Void, String> {
         if(params[0] instanceof String) {
             try {
                 String url = (String)params[0];
+
                 // This is getting the url from the string we passed in
                 return HttpGet(url);
                 // Create the urlConnection
@@ -42,6 +44,7 @@ public class HttpGetAsyncTask extends AsyncTask<Object, Void, String> {
 
             }
         }
+
         if(params[0] instanceof Map) {
             HashMap<String,String> Map = (HashMap<String,String>)params[0];
             try{
@@ -69,64 +72,70 @@ public class HttpGetAsyncTask extends AsyncTask<Object, Void, String> {
 
     private void HttpPost(HashMap<String,String> request) throws IOException{
         String myURL = request.get("URL");
-        OutputStream out=null;
+        Log.d("QUERY", "URL is "+myURL);
+
+        URL url = new URL(myURL);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
         try {
-            URL url = new URL(myURL);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoInput(true);
             urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("POST");
+            //urlConnection.setDoInput(true);
+            OutputStream out= new BufferedOutputStream(urlConnection.getOutputStream());
 
 
             HashMap<String,String> values = new HashMap<String, String>();
             values.put("Pawn",request.get("Pawn"));
             values.put("X",request.get("X"));
             values.put("Y", request.get("Y"));
-            //out = new BufferedOutputStream(urlConnection.getOutputStream());
+            String data= getQuery(values);
+            Log.d("HTPOST", "Sending "+data);
+            out.write(data.getBytes());
+            out.flush();
 
-            OutputStream os = urlConnection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getQuery(values));
 
-            writer.flush();
-            Log.d("HTPOST", "QUERY SENT");
-            writer.close();
-            os.close();
-
-            urlConnection.connect();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            if(in != null) {
+                Log.d("HTPOST","Received "+convertInputStreamToString(in));
+            }
 
 
 
 
         }
-        catch(Exception e){
-            e.printStackTrace();
+        finally {
+            urlConnection.disconnect();
         }
     }
 
 
     private String HttpGet(String myUrl) throws IOException {
+        Log.d("HTGET", "Made it to GET call");
         InputStream inputStream = null;
         String result = "";
 
         URL url = new URL(myUrl);
-
+        Log.d("HTGET", "URL =  "+myUrl);
         // create HttpURLConnection
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
+        Log.d("HTGET", "Successfully opened connection");
         // make GET request to the given URL
-        conn.connect();
+        //conn.connect();
 
 
         // receive response as inputStream
         inputStream = conn.getInputStream();
-
+        Log.d("HTGET", "connection had input Stream");
         // convert inputstream to string
-        if(inputStream != null)
+        if(inputStream != null) {
             result = convertInputStreamToString(inputStream);
-        else
+            Log.d("HTGET", "We got something");
+        }
+        else{
             result = "Did not work!";
+            Log.d("HTGET", "We got nothing");
+        }
+
 
         return result;
     }
@@ -163,6 +172,7 @@ public class HttpGetAsyncTask extends AsyncTask<Object, Void, String> {
             result.append(URLEncoder.encode(value, "UTF-8"));
         }
 
+        Log.d("QUERY", result.toString());
         return result.toString();
     }
 }

@@ -279,4 +279,10 @@ public class Pawn {
         hp=0;
     }
 
+    public void parseUpdates(String updates){
+        updates.substring(0,updates.indexOf("Game"));
+        updates=updates.replaceAll("[^0-9]+"," ");
+         //if (updates.)
+    }
+
 }
